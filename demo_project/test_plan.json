@@ -1,0 +1,232 @@
+{
+  "plan_version": "1.0",
+  "target_coverage": 90,
+  "test_cases": [
+    {
+      "service": "Unknown",
+      "method": "add",
+      "test_id": "Unknown_add_001",
+      "type": "happy_path",
+      "description": "Kiểm tra phép cộng hai số dương thông thường",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 1.0,
+        "b": 2.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == 3.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "add",
+      "test_id": "Unknown_add_002",
+      "type": "edge_case",
+      "description": "Kiểm tra phép cộng với cả hai tham số bằng 0",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 0.0,
+        "b": 0.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == 0.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "add",
+      "test_id": "Unknown_add_003",
+      "type": "error_path",
+      "description": "Kiểm tra khi tham số a là None gây TypeError",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": null,
+        "b": 2.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [],
+        "verify_mocks": [],
+        "throws": "TypeError",
+        "exception_message_contains": "unsupported operand type(s) for +"
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "add",
+      "test_id": "Unknown_add_004",
+      "type": "edge_case",
+      "description": "Kiểm tra phép cộng với số âm và số dương",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": -5.0,
+        "b": 3.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == -2.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "add",
+      "test_id": "Unknown_add_005",
+      "type": "edge_case",
+      "description": "Kiểm tra phép cộng với số thập phân",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 0.1,
+        "b": 0.2
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "abs(result - 0.3) < 1e-9"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "divide",
+      "test_id": "Unknown_divide_001",
+      "type": "happy_path",
+      "description": "Kiểm tra phép chia hai số dương thông thường",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 10.0,
+        "b": 2.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == 5.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "divide",
+      "test_id": "Unknown_divide_002",
+      "type": "edge_case",
+      "description": "Kiểm tra phép chia với tử số bằng 0",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 0.0,
+        "b": 5.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == 0.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "divide",
+      "test_id": "Unknown_divide_003",
+      "type": "error_path",
+      "description": "Kiểm tra phép chia với mẫu số bằng 0 gây ValueError",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 10.0,
+        "b": 0.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [],
+        "verify_mocks": [],
+        "throws": "ValueError",
+        "exception_message_contains": "division by zero"
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "divide",
+      "test_id": "Unknown_divide_004",
+      "type": "edge_case",
+      "description": "Kiểm tra phép chia với số âm",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": -10.0,
+        "b": 2.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "result == -5.0"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    },
+    {
+      "service": "Unknown",
+      "method": "divide",
+      "test_id": "Unknown_divide_005",
+      "type": "edge_case",
+      "description": "Kiểm tra phép chia với kết quả không nguyên",
+      "setup": {
+        "mocks": []
+      },
+      "input": {
+        "a": 7.0,
+        "b": 3.0
+      },
+      "expected": {
+        "return_type": "float",
+        "assertions": [
+          "abs(result - 2.3333333333333335) < 1e-9"
+        ],
+        "verify_mocks": [],
+        "throws": null,
+        "exception_message_contains": null
+      }
+    }
+  ]
+}

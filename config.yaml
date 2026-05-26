@@ -1,10 +1,11 @@
 # System Configuration for Unit Test Agent
 
 models:
-  stage1: "kimi/kimi-k2.6"
+  stage1: "deepseek/deepseek-v4-flash"
   stage2: "deepseek/deepseek-v4-flash"
-  stage3: "kimi/kimi-k2.6"
-  stage3_fallback: "deepseek/deepseek-v4-pro"
+  stage3: "deepseek/deepseek-v4-flash"
+  stage3_fallback: "deepseek/deepseek-v4-flash"
+  stage5: "deepseek/deepseek-v4-flash"
   retry: "deepseek/deepseek-v4-flash"
 
 coverage:
