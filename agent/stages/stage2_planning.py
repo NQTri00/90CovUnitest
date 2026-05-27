@@ -76,15 +76,53 @@ class Stage2Planning:
         # Sanitize test plan to comply with schema constraints
         if test_plan and "test_cases" in test_plan:
             for tc in test_plan["test_cases"]:
-                if "input" in tc and isinstance(tc["input"], dict):
+                # Ensure service, method, test_id, description are strings and not None
+                for field in ["service", "method", "test_id", "description", "type"]:
+                    if field in tc:
+                        if tc[field] is None:
+                            tc[field] = ""
+                        else:
+                            tc[field] = str(tc[field])
+                
+                # Sanitize setup
+                if "setup" not in tc or not isinstance(tc["setup"], dict):
+                    tc["setup"] = {"mocks": []}
+                elif "mocks" not in tc["setup"] or not isinstance(tc["setup"]["mocks"], list):
+                    tc["setup"]["mocks"] = []
+                    
+                for mock in tc["setup"]["mocks"]:
+                    if "return_value" in mock:
+                        if mock["return_value"] is None:
+                            mock["return_value"] = ""
+                        else:
+                            mock["return_value"] = str(mock["return_value"])
+
+                # Sanitize input
+                if "input" not in tc or not isinstance(tc["input"], dict):
+                    tc["input"] = {}
+                else:
                     tc["input"] = {k: str(v) if v is not None else "null" for k, v in tc["input"].items()}
-                if "setup" in tc and isinstance(tc["setup"], dict) and "mocks" in tc["setup"]:
-                    for mock in tc["setup"]["mocks"]:
-                        if "return_value" in mock:
-                            if mock["return_value"] is None:
-                                mock["return_value"] = ""
-                            else:
-                                mock["return_value"] = str(mock["return_value"])
+
+                # Sanitize expected
+                if "expected" not in tc or not isinstance(tc["expected"], dict):
+                    tc["expected"] = {"return_type": "void", "assertions": []}
+                else:
+                    exp = tc["expected"]
+                    if "return_type" in exp:
+                        if exp["return_type"] is None:
+                            exp["return_type"] = "void"
+                        else:
+                            exp["return_type"] = str(exp["return_type"])
+                    else:
+                        exp["return_type"] = "void"
+                        
+                    if "assertions" in exp and isinstance(exp["assertions"], list):
+                        exp["assertions"] = [str(a) for a in exp["assertions"] if a is not None]
+                    elif "assertions" not in exp:
+                        exp["assertions"] = []
+                        
+                    if "verify_mocks" in exp and isinstance(exp["verify_mocks"], list):
+                        exp["verify_mocks"] = [str(vm) for vm in exp["verify_mocks"] if vm is not None]
 
         # Validate against schema
         if schema and test_plan:
