@@ -142,12 +142,22 @@ class Stage4Execution:
                 pytest_cmd = candidate
                 break
 
+        # Target only the generated test files from the current run
+        test_files = []
+        if generated_tests:
+            for t in generated_tests:
+                if t.get("file_path"):
+                    test_files.append(t["file_path"])
+        
+        # Fallback if no files listed (should not happen)
+        if not test_files:
+            test_files = ["generated_tests/"]
+
         cmd = [
             pytest_cmd,
             "--cov=.",  # Analyze the entire project folder
-            "--cov-report=xml",
-            "generated_tests/"  # Run tests in the generated_tests directory
-        ]
+            "--cov-report=xml"
+        ] + test_files
 
         logger.info(f"Running command: {' '.join(cmd)} inside {repo_path}")
         
