@@ -93,3 +93,71 @@ def test_stage1_analysis(temp_project_dir):
     assert len(services[0]["methods"]) == 1
     assert services[0]["methods"][0]["name"] == "getProductName"
     assert services[0]["methods"][0]["complexity"] == 2  # 1 base + 1 if
+
+def test_discover_service_files_heuristics():
+    config = {}
+    stage1 = Stage1Analysis(config)
+    
+    # Create temp dir structure with various files
+    temp_dir = tempfile.mkdtemp()
+    try:
+        # 1. ProductService.java -> service keyword, public methods, annotations -> High score
+        service_java = os.path.join(temp_dir, "src/main/java/com/example/demo/service/ProductService.java")
+        os.makedirs(os.path.dirname(service_java), exist_ok=True)
+        with open(service_java, "w", encoding="utf-8") as f:
+            f.write("""
+            package com.example.demo.service;
+            import org.springframework.stereotype.Service;
+            @Service
+            public class ProductService {
+                public void doSomething() {}
+                public void doAnother() {}
+            }
+            """)
+            
+        # 2. CalculatorHandler.py -> handler keyword, 1 class, 2 public methods -> High score
+        handler_py = os.path.join(temp_dir, "app/handlers/calculator.py")
+        os.makedirs(os.path.dirname(handler_py), exist_ok=True)
+        with open(handler_py, "w", encoding="utf-8") as f:
+            f.write("""
+class CalculatorHandler:
+    def __init__(self, dependency):
+        self.dep = dependency
+    def add(self, a, b):
+        return a + b
+    def subtract(self, a, b):
+        return a - b
+            """)
+            
+        # 3. config.py -> config keyword (-50), no class and <50 lines (-30) -> Negative score
+        config_py = os.path.join(temp_dir, "config/config.py")
+        os.makedirs(os.path.dirname(config_py), exist_ok=True)
+        with open(config_py, "w", encoding="utf-8") as f:
+            f.write("DATABASE_URL = 'sqlite://'\nDEBUG = True\n")
+            
+        # 4. test_service.py -> Starts with test_ -> Hard Exclude
+        test_py = os.path.join(temp_dir, "app/test_service.py")
+        os.makedirs(os.path.dirname(test_py), exist_ok=True)
+        with open(test_py, "w", encoding="utf-8") as f:
+            f.write("def test_something(): pass\n")
+            
+        # 5. venv directory -> Hard Exclude
+        venv_py = os.path.join(temp_dir, "venv/lib/python3.11/site-packages/some_service.py")
+        os.makedirs(os.path.dirname(venv_py), exist_ok=True)
+        with open(venv_py, "w", encoding="utf-8") as f:
+            f.write("class SomeService: pass\n")
+
+        # Test Java discovery
+        java_discovered = stage1.discover_service_files(temp_dir, "java")
+        # Only ProductService.java should be discovered
+        assert len(java_discovered) == 1
+        assert "ProductService.java" in java_discovered[0].replace("\\", "/")
+        
+        # Test Python discovery
+        python_discovered = stage1.discover_service_files(temp_dir, "python")
+        # Only CalculatorHandler.py should be discovered
+        assert len(python_discovered) == 1
+        assert "calculator.py" in python_discovered[0].replace("\\", "/")
+        
+    finally:
+        shutil.rmtree(temp_dir)
