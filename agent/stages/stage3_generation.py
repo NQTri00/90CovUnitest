@@ -5,7 +5,7 @@ import logging
 import py_compile
 import subprocess
 import javalang
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 
 from agent.state import AgentState
 from agent.llm.client import OpenRouterClient
@@ -15,6 +15,7 @@ from agent.llm.prompts import (
     STAGE3_USER_PROMPT_TEMPLATE,
     STAGE3_AUTO_FIX_PROMPT
 )
+from agent.progress import update_progress
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class Stage3Generation:
         framework = state.get("framework", "spring-boot")
 
         logger.info(f"Starting Stage 3: Test Generation for {language} project.")
+        update_progress(3, 10, "Bắt đầu sinh mã nguồn kiểm thử (Test Generation)...")
 
         # Group test cases by service name
         service_test_cases = {}
@@ -57,7 +59,14 @@ class Stage3Generation:
         services_analysis = state.get("analysis_result", {}).get("services", [])
         services_by_name = {s["class_name"]: s for s in services_analysis}
 
-        for service_name, tcs in service_test_cases.items():
+        total_services = len(service_test_cases)
+        for idx, (service_name, tcs) in enumerate(service_test_cases.items()):
+            percentage = 10 + int((idx) / max(total_services, 1) * 80)
+            update_progress(3, percentage, f"Đang tạo test case cho dịch vụ ({idx+1}/{total_services}): {service_name}", {
+                "generating_service": service_name,
+                "generated_files": [f["file_path"] for f in generated_files]
+            })
+
             service_meta = services_by_name.get(service_name)
             if not service_meta:
                 logger.warning(f"Metadata for service {service_name} not found in analysis. Skipping.")
@@ -115,6 +124,10 @@ class Stage3Generation:
 
         state["generated_tests"] = generated_files
         state["history"].append(f"Stage 3 completed: Generated {len(generated_files)} test files.")
+
+        update_progress(3, 100, f"Đã sinh xong bộ test cho {len(generated_files)} dịch vụ.", {
+            "generated_files": [f["file_path"] for f in generated_files]
+        })
 
         return state
 

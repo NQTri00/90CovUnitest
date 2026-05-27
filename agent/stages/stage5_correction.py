@@ -3,8 +3,9 @@ import logging
 from typing import Dict, Any
 
 from agent.state import AgentState
-from agent.llm.client import OpenRouterClient
+from agent.llm.client import OpenRouterClient, clean_json_response
 from agent.llm.prompts import STAGE5_SYSTEM_PROMPT, STAGE5_USER_PROMPT_TEMPLATE
+from agent.progress import update_progress
 
 logger = logging.getLogger(__name__)
 
@@ -30,29 +31,33 @@ class Stage5Correction:
         retry_count = state.get("retry_count", 0)
 
         logger.info(f"Checking coverage target: current={current_coverage}%, target={target_coverage}% (retry={retry_count}/{self.max_retry})")
+        update_progress(5, 10, f"Kiểm tra mục tiêu độ bao phủ ({current_coverage}%/{target_coverage}%)...")
 
         # Base case 1: Target coverage met
         if current_coverage >= target_coverage:
             logger.info("Target coverage met. Self-correction succeeded!")
             state["history"].append("Self-correction loop finished: Target coverage achieved.")
+            update_progress(5, 100, f"Độ bao phủ đạt yêu cầu ({current_coverage}%). Kết thúc vòng sửa lỗi.")
             return state
 
         # Base case 2: Max retries exceeded
         if retry_count >= self.max_retry:
             logger.warning("Max retries exceeded. Terminating feedback loop without meeting target coverage.")
             state["history"].append("Self-correction loop finished: Max retry limit reached.")
+            update_progress(5, 100, f"Đạt giới hạn số lần sửa đổi tối đa ({self.max_retry}). Kết thúc.")
             return state
 
         # Trigger self-correction retry
         new_retry_count = retry_count + 1
         state["retry_count"] = new_retry_count
         logger.info(f"Coverage not met. Triggering self-correction loop (attempt {new_retry_count}/{self.max_retry}).")
+        update_progress(5, 30, f"Độ bao phủ chưa đạt {target_coverage}%. Bắt đầu tự động sửa đổi lần {new_retry_count}/{self.max_retry}...")
 
         # Perform correction (LLM or fallback)
         updated_plan = None
         if not self.llm_client.api_key or self.llm_client.api_key.startswith("your-openrouter-api-key"):
-            logger.info("OPENROUTER_API_KEY is unset or mock. Simulating feedback loop correction offline.")
-            updated_plan = self.simulate_fallback_correction(test_plan)
+            logger.error("OPENROUTER_API_KEY is unset or mock. Programmatic simulation fallback is disabled.")
+            raise RuntimeError("Self-correction failed: OPENROUTER_API_KEY is not configured or mock.")
         else:
             try:
                 user_prompt = STAGE5_USER_PROMPT_TEMPLATE.format(
@@ -71,38 +76,15 @@ class Stage5Correction:
                     response_format={"type": "json_object"}
                 )
 
-                updated_plan = json.loads(response)
+                cleaned_response = clean_json_response(response)
+                updated_plan = json.loads(cleaned_response)
             except Exception as e:
-                logger.error(f"Stage 5 LLM correction failed: {e}. Falling back to programmatic simulation.")
-                updated_plan = self.simulate_fallback_correction(test_plan)
+                logger.error(f"Stage 5 LLM correction failed: {e}.")
+                raise RuntimeError(f"Self-correction LLM call failed: {e}")
 
         if updated_plan:
             state["test_plan"] = updated_plan
 
         state["history"].append(f"Self-correction loop retry #{new_retry_count} triggered.")
+        update_progress(5, 60, f"Đã sinh kế hoạch kiểm thử mới nhằm tối ưu hóa độ bao phủ.")
         return state
-
-    def simulate_fallback_correction(self, test_plan: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Enrich test plan programmatically to simulate feedback loop correction.
-        """
-        corrected_plan = json.loads(json.dumps(test_plan)) # Deep copy
-        
-        # Append a simulated test case designed to hit uncovered lines
-        corrected_plan["test_cases"].append({
-            "service": "SimulatedService",
-            "method": "simulatedMethod",
-            "test_id": "SimulatedService_simulatedMethod_999",
-            "type": "happy_path",
-            "description": "Simulated test case added during feedback loop to cover lines 10 and 15",
-            "setup": {
-                "mocks": []
-            },
-            "input": {},
-            "expected": {
-                "return_type": "void",
-                "assertions": ["result == null"]
-            }
-        })
-        
-        return corrected_plan

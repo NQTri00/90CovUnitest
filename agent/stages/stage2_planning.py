@@ -5,8 +5,9 @@ from typing import Dict, Any, List
 from jsonschema import validate
 
 from agent.state import AgentState
-from agent.llm.client import OpenRouterClient
+from agent.llm.client import OpenRouterClient, clean_json_response
 from agent.llm.prompts import STAGE2_SYSTEM_PROMPT, STAGE2_USER_PROMPT_TEMPLATE
+from agent.progress import update_progress
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class Stage2Planning:
             raise ValueError("No analysis result found in state. Run Stage 1 first.")
 
         logger.info("Starting Stage 2: Test Planning")
+        update_progress(2, 10, "Bắt đầu lập kế hoạch kiểm thử (Test Planning)...")
 
         # Load Schema
         schema_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
@@ -41,6 +43,7 @@ class Stage2Planning:
         # Check API Key
         if not self.llm_client.api_key or self.llm_client.api_key.startswith("your-openrouter-api-key"):
             logger.info("OPENROUTER_API_KEY is not set or mock. Running Local Fallback Plan Generator.")
+            update_progress(2, 40, "Đang khởi tạo kế hoạch kiểm thử mặc định (Local fallback)...")
             test_plan = self.generate_local_fallback_plan(analysis_result)
         else:
             try:
@@ -56,16 +59,32 @@ class Stage2Planning:
                     {"role": "user", "content": user_prompt}
                 ]
 
+                update_progress(2, 30, "Đang chạy mô hình AI DeepSeek V4 để phác thảo các kịch bản kiểm thử...")
                 response = self.llm_client.chat_completion(
                     messages=messages,
                     model=self.model,
                     response_format={"type": "json_object"}
                 )
 
-                test_plan = json.loads(response)
+                cleaned_response = clean_json_response(response)
+                test_plan = json.loads(cleaned_response)
             except Exception as e:
                 logger.error(f"LLM Test Planning failed: {e}. Falling back to local programmatic generator.")
+                update_progress(2, 60, "Phân tích AI thất bại, đang chuyển sang bộ sinh kế hoạch mặc định...")
                 test_plan = self.generate_local_fallback_plan(analysis_result)
+
+        # Sanitize test plan to comply with schema constraints
+        if test_plan and "test_cases" in test_plan:
+            for tc in test_plan["test_cases"]:
+                if "input" in tc and isinstance(tc["input"], dict):
+                    tc["input"] = {k: str(v) if v is not None else "null" for k, v in tc["input"].items()}
+                if "setup" in tc and isinstance(tc["setup"], dict) and "mocks" in tc["setup"]:
+                    for mock in tc["setup"]["mocks"]:
+                        if "return_value" in mock:
+                            if mock["return_value"] is None:
+                                mock["return_value"] = ""
+                            else:
+                                mock["return_value"] = str(mock["return_value"])
 
         # Validate against schema
         if schema and test_plan:
@@ -78,6 +97,11 @@ class Stage2Planning:
 
         state["test_plan"] = test_plan
         state["history"].append("Stage 2 completed: Test planning done.")
+
+        test_cases_count = len(test_plan.get("test_cases", [])) if test_plan else 0
+        update_progress(2, 100, f"Đã lập kế hoạch xong {test_cases_count} kịch bản kiểm thử.", {
+            "test_cases_count": test_cases_count
+        })
 
         return state
 

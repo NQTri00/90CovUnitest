@@ -1,13 +1,13 @@
 {
   "total_coverage": 95.0,
   "summary": {
-    "total_tests": 10,
-    "passed": 10,
+    "total_tests": 9,
+    "passed": 9,
     "failed": 0,
     "skipped": 0
   },
   "classes": {
-    "Unknown": {
+    "CalculatorService": {
       "line_coverage": 95.0,
       "branch_coverage": 90.0,
       "uncovered_lines": []

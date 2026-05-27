@@ -64,3 +64,34 @@ class OpenRouterClient:
                 time.sleep(backoff_in_seconds * (2 ** attempt))
                 
         raise RuntimeError("Chat completion failed after all retries.")
+
+def clean_json_response(content: str) -> str:
+    """
+    Cleans and extracts JSON block from a potentially noisy markdown string.
+    """
+    if not content:
+        return ""
+        
+    s = content.strip()
+    
+    # Remove markdown code block markers
+    if s.startswith("```json"):
+        s = s[7:]
+    elif s.startswith("```"):
+        s = s[3:]
+        
+    if s.endswith("```"):
+        s = s[:-3]
+        
+    s = s.strip()
+    
+    # Extract outermost braces to isolate JSON block from LLM chat wrapper text
+    try:
+        start_idx = s.index("{")
+        end_idx = s.rindex("}")
+        s = s[start_idx:end_idx + 1]
+    except ValueError:
+        pass
+        
+    return s
+
