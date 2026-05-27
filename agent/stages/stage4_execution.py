@@ -87,15 +87,14 @@ class Stage4Execution:
         if os.path.exists(coverage_xml_path):
             os.remove(coverage_xml_path)
 
-        # Auto-install dependencies if requirements.txt is found
-        req_path = None
+        # Auto-install dependencies from all requirements.txt files found in the workspace
+        req_paths = []
         for root, dirs, files in os.walk(repo_path):
             dirs[:] = [d for d in dirs if d not in ["venv", ".venv", "node_modules", ".git"]]
             if "requirements.txt" in files:
-                req_path = os.path.join(root, "requirements.txt")
-                break
+                req_paths.append(os.path.join(root, "requirements.txt"))
                 
-        if req_path:
+        for req_path in req_paths:
             logger.info(f"Installing project dependencies from {req_path}...")
             try:
                 with open(req_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -119,9 +118,9 @@ class Stage4Execution:
                         )
                     except Exception as pkg_err:
                         logger.warning(f"Failed to install package {req}: {pkg_err}")
-                logger.info("Finished installing dependencies.")
+                logger.info(f"Finished installing dependencies from {req_path}.")
             except Exception as e:
-                logger.error(f"Failed to install dependencies: {e}")
+                logger.error(f"Failed to install dependencies from {req_path}: {e}")
 
         # Run pytest inside repo_path using the active python virtualenv if available
         # Find pytest executable
@@ -156,15 +155,20 @@ class Stage4Execution:
         env = os.environ.copy()
         python_paths = [repo_path]
         
-        # Find Python project roots (directories containing python files or project config files)
-        # but do NOT add nested subdirectories recursively to avoid standard library shadowing.
+        # Avoid standard python library shadowing when adding folders to PYTHONPATH
+        STD_LIBS_TO_AVOID_SHADOWING = {
+            "email.py", "logging.py", "json.py", "math.py", "random.py", 
+            "csv.py", "socket.py", "select.py", "threading.py", "time.py", 
+            "os.py", "sys.py", "re.py", "http.py", "unittest.py", "pytest.py",
+            "collections.py", "typing.py", "datetime.py", "hashlib.py", "uuid.py",
+            "asyncio.py", "subprocess.py", "shutil.py", "tempfile.py", "xml.py"
+        }
+        
         for root, dirs, files in os.walk(repo_path):
             dirs[:] = [d for d in dirs if d not in ["venv", ".venv", "node_modules", ".git", "generated_tests", "tests", "frontend", "front-end", "ui", "client"]]
-            if any(f in files for f in ["requirements.txt", "pyproject.toml", "setup.py", "Pipfile"]):
-                if root not in python_paths:
-                    python_paths.append(root)
-            elif os.path.dirname(root) == repo_path or root == repo_path:
-                if any(f.endswith(".py") for f in files):
+            if any(f.endswith(".py") for f in files):
+                has_shadowing_file = any(f in STD_LIBS_TO_AVOID_SHADOWING for f in files)
+                if not has_shadowing_file:
                     if root not in python_paths:
                         python_paths.append(root)
                         
