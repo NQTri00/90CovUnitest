@@ -87,13 +87,47 @@ class Stage4Execution:
         if os.path.exists(coverage_xml_path):
             os.remove(coverage_xml_path)
 
+        # Auto-install dependencies if requirements.txt is found
+        req_path = None
+        for root, dirs, files in os.walk(repo_path):
+            dirs[:] = [d for d in dirs if d not in ["venv", ".venv", "node_modules", ".git"]]
+            if "requirements.txt" in files:
+                req_path = os.path.join(root, "requirements.txt")
+                break
+                
+        if req_path:
+            logger.info(f"Installing project dependencies from {req_path}...")
+            try:
+                subprocess.run(
+                    ["pip", "install", "--no-cache-dir", "-r", req_path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=120
+                )
+                logger.info("Dependencies installed successfully.")
+            except Exception as e:
+                logger.error(f"Failed to install dependencies: {e}")
+
         # Run pytest inside repo_path using the active python virtualenv if available
         # Find pytest executable
         pytest_cmd = "pytest"
-        if os.path.exists(os.path.join(repo_path, "venv", "Scripts", "pytest.exe")):
-            pytest_cmd = os.path.join(repo_path, "venv", "Scripts", "pytest.exe")
-        elif os.path.exists(os.path.join(repo_path, ".venv", "Scripts", "pytest.exe")):
-            pytest_cmd = os.path.join(repo_path, ".venv", "Scripts", "pytest.exe")
+        venv_candidates = [
+            # Linux/macOS candidates
+            os.path.join(repo_path, "venv", "bin", "pytest"),
+            os.path.join(repo_path, ".venv", "bin", "pytest"),
+            os.path.join(repo_path, "backend", "venv", "bin", "pytest"),
+            os.path.join(repo_path, "backend", ".venv", "bin", "pytest"),
+            # Windows candidates
+            os.path.join(repo_path, "venv", "Scripts", "pytest.exe"),
+            os.path.join(repo_path, ".venv", "Scripts", "pytest.exe"),
+            os.path.join(repo_path, "backend", "venv", "Scripts", "pytest.exe"),
+            os.path.join(repo_path, "backend", ".venv", "Scripts", "pytest.exe"),
+        ]
+        for candidate in venv_candidates:
+            if os.path.exists(candidate):
+                pytest_cmd = candidate
+                break
 
         cmd = [
             pytest_cmd,
@@ -107,11 +141,19 @@ class Stage4Execution:
         # Build robust PYTHONPATH including source folders
         env = os.environ.copy()
         python_paths = [repo_path]
+        
+        # Find Python project roots (directories containing python files or project config files)
+        # but do NOT add nested subdirectories recursively to avoid standard library shadowing.
         for root, dirs, files in os.walk(repo_path):
-            # Exclude virtual environments and temporary directories
-            dirs[:] = [d for d in dirs if d not in ["venv", ".venv", "node_modules", ".git", "generated_tests", "tests"]]
-            if any(f.endswith(".py") for f in files):
-                python_paths.append(root)
+            dirs[:] = [d for d in dirs if d not in ["venv", ".venv", "node_modules", ".git", "generated_tests", "tests", "frontend", "front-end", "ui", "client"]]
+            if any(f in files for f in ["requirements.txt", "pyproject.toml", "setup.py", "Pipfile"]):
+                if root not in python_paths:
+                    python_paths.append(root)
+            elif os.path.dirname(root) == repo_path or root == repo_path:
+                if any(f.endswith(".py") for f in files):
+                    if root not in python_paths:
+                        python_paths.append(root)
+                        
         env["PYTHONPATH"] = os.pathsep.join(python_paths)
 
         try:

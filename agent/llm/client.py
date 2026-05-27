@@ -49,6 +49,7 @@ class OpenRouterClient:
                     "messages": messages,
                     "temperature": temperature,
                     "extra_headers": extra_headers,
+                    "max_tokens": 4096,
                 }
                 
                 if response_format:
