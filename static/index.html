@@ -304,6 +304,22 @@
                         <p class="input-help">Note: Thư mục cần nằm trong workspace hoặc map Docker.</p>
                     </div>
                 </div>
+
+                <!-- Clone GitHub Repository -->
+                <div class="settings-group" style="margin-top: 15px;">
+                    <div class="settings-title-bar">🐙 Clone GitHub Repository</div>
+                    
+                    <div class="form-group" style="position: relative; margin-top: 10px;">
+                        <label for="githubUrl">Đường dẫn GitHub Repository</label>
+                        <div class="input-with-button">
+                            <input type="text" id="githubUrl" placeholder="Ví dụ: https://github.com/user/repo.git ♡" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                            <button id="btnCloneRun" onclick="startGithubCloneRun()" class="btn-kawaii">
+                                <span class="btn-sparkle">✦</span> Clone & Run <span class="btn-sparkle">✦</span>
+                            </button>
+                        </div>
+                        <p class="input-help">Note: Mã nguồn sẽ được clone về thư mục <code>projects/</code>.</p>
+                    </div>
+                </div>
                 
                 <!-- Stepper Stages Progress -->
                 <div class="settings-group" style="margin-top: 15px;">

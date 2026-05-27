@@ -269,6 +269,44 @@ function formatLogLineToChat(logText) {
     return div;
 }
 
+function setButtonsRunningState(isRunning) {
+    const btnRun = document.getElementById("btnRun");
+    const btnCloneRun = document.getElementById("btnCloneRun");
+    if (isRunning) {
+        if (btnRun) {
+            btnRun.disabled = true;
+            btnRun.innerText = "Đang chạy...";
+        }
+        if (btnCloneRun) {
+            btnCloneRun.disabled = true;
+            btnCloneRun.innerText = "Đang chạy...";
+        }
+    } else {
+        if (btnRun) {
+            btnRun.disabled = false;
+            btnRun.innerText = "Khởi chạy";
+        }
+        if (btnCloneRun) {
+            btnCloneRun.disabled = false;
+            btnCloneRun.innerText = "Clone & Khởi chạy";
+        }
+    }
+}
+
+async function startGithubCloneRun() {
+    const githubUrl = document.getElementById("githubUrl").value.trim();
+    if (!githubUrl) {
+        alert("Vui lòng nhập đường dẫn GitHub Repository!");
+        return;
+    }
+    
+    // Set repoPath input value to the Github URL so that the rest of the application is aware
+    document.getElementById("repoPath").value = githubUrl;
+    
+    // Now trigger startAgentRun
+    await startAgentRun();
+}
+
 // Agent Core functions mapped to UI elements
 async function startAgentRun() {
     const repoPath = document.getElementById("repoPath").value.trim();
@@ -278,8 +316,7 @@ async function startAgentRun() {
     }
 
     // Reset UI
-    document.getElementById("btnRun").disabled = true;
-    document.getElementById("btnRun").innerText = "Đang chạy...";
+    setButtonsRunningState(true);
     
     // Hide results window and selector window
     document.getElementById("window-codeexplorer").style.display = "none";
@@ -330,8 +367,7 @@ async function startAgentRun() {
 
     } catch (error) {
         appendTerminalLog(`> Lỗi: ${error.message}`, "error-line");
-        document.getElementById("btnRun").disabled = false;
-        document.getElementById("btnRun").innerText = "Khởi chạy";
+        setButtonsRunningState(false);
         updateStatusBadge("Failed", "failed");
         document.getElementById("displayMental").innerText = "FAILED";
     }
@@ -385,8 +421,7 @@ async function pollStatus() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = null;
             updateStatusBadge("Completed", "completed");
-            document.getElementById("btnRun").disabled = false;
-            document.getElementById("btnRun").innerText = "Khởi chạy";
+            setButtonsRunningState(false);
             
             appendTerminalLog("> Agent hoàn thành toàn bộ quy trình thành công!", "system-line");
             
@@ -403,8 +438,7 @@ async function pollStatus() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = null;
             updateStatusBadge("Failed", "failed");
-            document.getElementById("btnRun").disabled = false;
-            document.getElementById("btnRun").innerText = "Khởi chạy";
+            setButtonsRunningState(false);
             
             appendTerminalLog(`> Tiến trình thất bại: ${data.error || "Không rõ nguyên nhân"}`, "error-line");
             document.getElementById("progressContainer").style.display = "none";
@@ -958,8 +992,7 @@ async function cancelRun() {
     if (confirm("Bạn có chắc chắn muốn hủy bỏ tiến trình này không?")) {
         document.getElementById("selectionPanel").style.display = "none";
         document.getElementById("progressContainer").style.display = "none";
-        document.getElementById("btnRun").disabled = false;
-        document.getElementById("btnRun").innerText = "Khởi chạy";
+        setButtonsRunningState(false);
         updateStatusBadge("Cancelled", "failed");
         appendTerminalLog("> Người dùng đã hủy bỏ tiến trình.", "error-line");
         document.getElementById("displayMental").innerText = "CANCELLED";

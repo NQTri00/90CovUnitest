@@ -53,6 +53,69 @@ def run_agent_task(run_id: str, repo_path: str):
 
     logger.info(f"Starting Phase 1 (Analysis & Planning) for run_id={run_id}, repo={repo_path}")
     try:
+        # Check if repo_path is a Git URL
+        is_git_url = repo_path.startswith(("http://", "https://", "git@", "git://")) or "github.com" in repo_path
+        
+        if is_git_url:
+            import urllib.parse
+            import subprocess
+            
+            # Create projects directory inside the workspace
+            projects_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "projects"))
+            os.makedirs(projects_dir, exist_ok=True)
+            
+            # Parse repo name
+            parsed = urllib.parse.urlparse(repo_path)
+            path_parts = [p for p in parsed.path.split('/') if p]
+            if path_parts:
+                repo_name = path_parts[-1]
+                if repo_name.endswith(".git"):
+                    repo_name = repo_name[:-4]
+            else:
+                repo_name = "cloned_repo_" + str(uuid.uuid4())[:8]
+                
+            dest_dir = os.path.join(projects_dir, repo_name)
+            
+            # Update progress message
+            runs_db[run_id]["progress"]["message"] = "Đang clone repository..."
+            
+            if os.path.exists(dest_dir):
+                runs_db[run_id]["logs"].append(f"[System] Thư mục dự án {repo_name} đã tồn tại trong folder projects/.")
+                runs_db[run_id]["logs"].append(f"[System] Đang tiến hành cập nhật mã nguồn mới nhất (git pull)...")
+                cmd = ["git", "-C", dest_dir, "pull"]
+            else:
+                runs_db[run_id]["logs"].append(f"[System] Bắt đầu clone repository từ URL: {repo_path}")
+                runs_db[run_id]["logs"].append(f"[System] Lưu trữ tại folder: projects/{repo_name}")
+                cmd = ["git", "clone", "--progress", repo_path, dest_dir]
+                
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1
+            )
+            
+            while True:
+                line = process.stderr.readline()
+                if not line:
+                    line = process.stdout.readline()
+                    if not line:
+                        break
+                line_str = line.strip()
+                if line_str:
+                    runs_db[run_id]["logs"].append(f"[System] [Git] {line_str}")
+                    # Also update progress message with latest line
+                    runs_db[run_id]["progress"]["message"] = f"Git: {line_str}"
+                    
+            process.wait()
+            if process.returncode != 0:
+                raise RuntimeError(f"Tiến trình Git thất bại với mã lỗi {process.returncode}")
+                
+            runs_db[run_id]["logs"].append(f"[System] Đồng bộ mã nguồn hoàn tất! Bắt đầu phân tích codebase...")
+            repo_path = dest_dir
+            runs_db[run_id]["repo_path"] = repo_path
+
         abs_repo_path = os.path.abspath(repo_path)
         if not os.path.exists(abs_repo_path):
             raise ValueError(f"Path does not exist: {repo_path}")
@@ -208,10 +271,13 @@ def resume_agent_task(run_id: str, selected_test_ids: List[str]):
 
 @app.post("/api/run")
 def start_run(req: RunRequest, background_tasks: BackgroundTasks):
-    # Check path existence first
-    abs_path = os.path.abspath(req.repo_path)
-    if not os.path.exists(abs_path):
-        raise HTTPException(status_code=400, detail=f"Thư mục '{req.repo_path}' không tồn tại trên hệ thống.")
+    # Check path existence first if it is not a Git URL
+    is_git_url = req.repo_path.startswith(("http://", "https://", "git@", "git://")) or "github.com" in req.repo_path
+    
+    if not is_git_url:
+        abs_path = os.path.abspath(req.repo_path)
+        if not os.path.exists(abs_path):
+            raise HTTPException(status_code=400, detail=f"Thư mục '{req.repo_path}' không tồn tại trên hệ thống.")
 
     run_id = str(uuid.uuid4())
     runs_db[run_id] = {
@@ -306,6 +372,7 @@ def list_directories(path: str = "."):
 
 # Serve static files
 os.makedirs("static", exist_ok=True)
+os.makedirs("projects", exist_ok=True)
 
 @app.get("/")
 def read_index():
