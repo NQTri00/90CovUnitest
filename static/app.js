@@ -104,16 +104,16 @@ function maximizeWindow(windowId) {
         // Restore standard layout sizes
         if (windowId === 'window-haishin') {
             win.style.width = '780px';
-            win.style.height = '480px';
+            win.style.height = '520px';
         } else if (windowId === 'window-codeexplorer') {
             win.style.width = '850px';
-            win.style.height = '520px';
+            win.style.height = '560px';
         } else if (windowId === 'window-settings') {
             win.style.width = '440px';
-            win.style.height = '380px';
+            win.style.height = '420px';
         } else if (windowId === 'window-webcam') {
             win.style.width = '380px';
-            win.style.height = '240px';
+            win.style.height = '280px';
         }
         win.style.top = '100px';
         win.style.left = '200px';

@@ -246,7 +246,8 @@ body {
 /* 1. webcam Window Standby Styles */
 .webcam-body {
     background-color: #ff9ee2;
-    height: 240px;
+    flex: 1;
+    min-height: 0;
     position: relative;
     padding: 0;
     overflow: hidden;
@@ -302,7 +303,8 @@ body {
 /* 2. haishin Stream Window Styles */
 .haishin-body {
     padding: 6px;
-    height: 480px;
+    flex: 1;
+    min-height: 0;
     overflow: hidden !important;
 }
 .haishin-layout {
@@ -636,7 +638,8 @@ body {
 /* 4. Settings Window Styles */
 .settings-body {
     padding: 6px;
-    height: 380px;
+    flex: 1;
+    min-height: 0;
 }
 .settings-group {
     background: #fff;
@@ -876,7 +879,8 @@ button:disabled {
 /* 6. Code Explorer Window Styles */
 .explorer-body {
     padding: 6px;
-    height: 520px;
+    flex: 1;
+    min-height: 0;
 }
 .dashboard-area {
     height: 100%;
