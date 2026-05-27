@@ -98,7 +98,40 @@ def test_stage5_trigger_correction_loop():
         history=[]
     )
     
-    final_state = stage5.run(state)
+    import unittest.mock
+    import json
+    
+    stage5.llm_client.api_key = "sk-or-v1-dummy-real-key"
+    mocked_plan = {
+        "plan_version": "1.0",
+        "target_coverage": 90,
+        "test_cases": [
+            {
+                "service": "ProductService",
+                "method": "getName",
+                "test_id": "ProductService_getName_001",
+                "type": "happy_path",
+                "description": "desc",
+                "setup": {"mocks": []},
+                "input": {},
+                "expected": {"return_type": "String", "assertions": []}
+            },
+            {
+                "service": "SimulatedService",
+                "method": "simulatedMethod",
+                "test_id": "SimulatedService_simulatedMethod_999",
+                "type": "happy_path",
+                "description": "Simulated test case added during feedback loop to cover lines 10 and 15",
+                "setup": {"mocks": []},
+                "input": {},
+                "expected": {"return_type": "void", "assertions": ["result == null"]}
+            }
+        ]
+    }
+    
+    with unittest.mock.patch.object(stage5.llm_client, "chat_completion", return_value=json.dumps(mocked_plan)):
+        final_state = stage5.run(state)
+        
     assert final_state["retry_count"] == 1 # incremented
     assert "Self-correction loop retry #1 triggered." in final_state["history"][-1]
     

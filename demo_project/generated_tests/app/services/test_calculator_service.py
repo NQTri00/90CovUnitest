@@ -1,62 +1,69 @@
+import math
 import pytest
 from unittest.mock import MagicMock, patch
-from calculator_service import CalculatorService  # assuming this module exists
+from calculator_service import CalculatorService
+
 
 @pytest.fixture
-def service():
-    """Fixture to create a CalculatorService instance."""
+def calculator_service():
     return CalculatorService()
 
+
 class TestCalculatorService:
-    """Unit tests for CalculatorService."""
+    """Test suite for CalculatorService."""
 
-    # ---------- add method tests ----------
+    def test_add_positive_numbers(self, calculator_service):
+        """Kiểm tra phép cộng hai số dương hợp lệ"""
+        result = calculator_service.add(2.5, 3.5)
+        assert result == 6.0
 
-    def test_add_positive_numbers(self, service):
-        """CalculatorService_add_001: Add two positive floats."""
-        result = service.add(10.0, 20.5)
-        assert result == 30.5
-
-    def test_add_negative_and_positive(self, service):
-        """CalculatorService_add_002: Add negative and positive floats."""
-        result = service.add(-5.0, 3.0)
-        assert result == -2.0
-
-    def test_add_zeros(self, service):
-        """CalculatorService_add_003: Add two zeros."""
-        result = service.add(0.0, 0.0)
-        assert result == 0.0
-
-    def test_add_small_decimals(self, service):
-        """CalculatorService_add_004: Add very small floats (precision)."""
-        result = service.add(0.0001, 0.0002)
-        # Use approx to allow floating point tolerance
-        assert result == pytest.approx(0.0003, rel=1e-9)
-
-    # ---------- divide method tests ----------
-
-    def test_divide_positive_numbers(self, service):
-        """CalculatorService_divide_001: Divide two positive floats."""
-        result = service.divide(10.0, 2.0)
+    def test_add_with_negative_number(self, calculator_service):
+        """Kiểm tra phép cộng với số âm"""
+        result = calculator_service.add(-5.0, 10.0)
         assert result == 5.0
 
-    def test_divide_negative_by_positive(self, service):
-        """CalculatorService_divide_002: Divide negative by positive."""
-        result = service.divide(-10.0, 2.0)
-        assert result == -5.0
-
-    def test_divide_zero_by_positive(self, service):
-        """CalculatorService_divide_003: Divide zero by positive."""
-        result = service.divide(0.0, 5.0)
+    def test_add_with_zero(self, calculator_service):
+        """Kiểm tra phép cộng với số không"""
+        result = calculator_service.add(0.0, 0.0)
         assert result == 0.0
 
-    def test_divide_by_very_small_number(self, service):
-        """CalculatorService_divide_004: Divide by a very small non-zero number."""
-        result = service.divide(1.0, 1e-10)
-        assert result == 1e10
+    def test_add_large_numbers(self, calculator_service):
+        """Kiểm tra phép cộng với giá trị cực lớn"""
+        result = calculator_service.add(1e+308, 1e+308)
+        assert result == float('inf') or not math.isfinite(result)
 
-    def test_divide_by_zero_raises_value_error(self, service):
-        """CalculatorService_divide_005: Division by zero raises ValueError."""
+    def test_add_small_floating_point(self, calculator_service):
+        """Kiểm tra phép cộng với số thập phân nhỏ xấp xỉ không"""
+        result = calculator_service.add(1e-323, -1e-323)
+        assert result == 0.0 or abs(result) < 1e-300
+
+    def test_divide_positive_numbers(self, calculator_service):
+        """Kiểm tra phép chia hai số dương hợp lệ"""
+        result = calculator_service.divide(10.0, 2.0)
+        assert result == 5.0
+
+    def test_divide_with_decimal_result(self, calculator_service):
+        """Kiểm tra phép chia với kết quả là số thập phân"""
+        result = calculator_service.divide(7.0, 3.0)
+        assert abs(result - 2.3333333333333335) < 1e-9
+
+    def test_divide_by_zero_raises_value_error(self, calculator_service):
+        """Kiểm tra phép chia cho số không - ném ValueError"""
         with pytest.raises(ValueError) as exc_info:
-            service.divide(10.0, 0.0)
+            calculator_service.divide(5.0, 0.0)
         assert str(exc_info.value) == "Cannot divide by zero"
+
+    def test_divide_zero_by_positive(self, calculator_service):
+        """Kiểm tra phép chia 0 cho số dương"""
+        result = calculator_service.divide(0.0, 5.0)
+        assert result == 0.0
+
+    def test_divide_negative_by_positive(self, calculator_service):
+        """Kiểm tra phép chia số âm cho số dương"""
+        result = calculator_service.divide(-10.0, 2.0)
+        assert result == -5.0
+
+    def test_divide_large_dividend_causes_overflow(self, calculator_service):
+        """Kiểm tra phép chia với số bị chia quá lớn gây overflow"""
+        result = calculator_service.divide(1e+308, 0.1)
+        assert result == float('inf') or not math.isfinite(result)

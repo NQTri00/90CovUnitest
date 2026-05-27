@@ -462,6 +462,7 @@
                         <div class="tabs">
                             <button class="tab-btn active" onclick="switchTab('tab-plan')">📋 Kế hoạch kiểm thử</button>
                             <button class="tab-btn" onclick="switchTab('tab-code')">💻 Mã nguồn sinh ra</button>
+                            <button class="tab-btn" onclick="switchTab('tab-report')" id="btn-tab-report" style="display: none;">📊 Báo cáo kiểm thử</button>
                         </div>
                         
                         <!-- Test Plan Tab -->
@@ -497,6 +498,17 @@
                                     </div>
                                     <pre><code class="language-python" id="codeArea"># Mã nguồn sẽ xuất hiện ở đây sau khi chọn tệp~ ✧</code></pre>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Report Tab -->
+                        <div class="tab-content" id="tab-report">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 2px solid var(--purple); padding-bottom: 6px;">
+                                <span style="font-family: 'Silkscreen', monospace; font-size: 0.75rem; color: var(--purple); font-weight: bold;">📝 Báo cáo phân tích quá trình kiểm thử</span>
+                                <button class="win-btn" onclick="downloadReport()" style="background: var(--pink); color: #fff; font-size: 0.65rem; padding: 2px 8px; cursor: pointer; border-radius: 2px;">💾 Tải xuống .md</button>
+                            </div>
+                            <div class="report-viewer" id="reportViewer" style="background: #faf6fc; border: 2px inset var(--purple); padding: 12px; font-family: 'Zen Maru Gothic', sans-serif; font-size: 0.8rem; line-height: 1.4; overflow-y: auto; max-height: 350px;">
+                                <!-- Markdown content will be rendered here -->
                             </div>
                         </div>
                     </div>

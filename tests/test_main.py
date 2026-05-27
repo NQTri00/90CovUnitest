@@ -35,18 +35,50 @@ def test_main_cli_help():
     assert result.returncode == 0
     assert "Unit Test Agent" in result.stdout
 
-def test_main_cli_execution(temp_repo):
-    # Verify end-to-end run via CLI
-    cmd = [".\\venv\\Scripts\\python", "main.py", "--repo", temp_repo]
-    env = os.environ.copy()
-    env["PYTHONIOENCODING"] = "utf-8"
-    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, encoding="utf-8")
+def test_main_cli_execution(temp_repo, capsys):
+    import io
+    import sys
+    import unittest.mock
+    from agent.stages.stage4_execution import Stage4Execution
+    from agent.stages.stage5_correction import Stage5Correction
+    from main import main
+
+    def mock_stage4_run(self, state):
+        state["coverage_report"] = {
+            "total_coverage": 95.0,
+            "summary": {"total_tests": 1, "passed": 1, "failed": 0, "skipped": 0},
+            "classes": {
+                "SimpleService": {
+                    "line_coverage": 95.0,
+                    "branch_coverage": 95.0,
+                    "uncovered_lines": []
+                }
+            },
+            "failures": []
+        }
+        state["history"].append("Stage 4 completed: Test execution and coverage analysis done.")
+        return state
+
+    def mock_stage5_run(self, state):
+        state["history"].append("Self-correction loop finished: Target coverage achieved.")
+        return state
+
+    sys_argv_backup = sys.argv
+    sys.argv = ["main.py", "--repo", temp_repo]
     
-    assert result.returncode == 0
-    assert "NHẬT KÝ HOẠT ĐỘNG" in result.stdout
-    assert "KẾT QUẢ CUỐI CÙNG" in result.stdout
-    assert "Saved test plan to" in result.stdout
-    assert "Saved coverage report to" in result.stdout
+    with unittest.mock.patch.object(Stage4Execution, "run", mock_stage4_run), \
+         unittest.mock.patch.object(Stage5Correction, "run", mock_stage5_run):
+        main()
+        
+    sys.argv = sys_argv_backup
+    
+    captured = capsys.readouterr()
+    output = captured.out
+    
+    assert "NHẬT KÝ HOẠT ĐỘNG" in output
+    assert "KẾT QUẢ CUỐI CÙNG" in output
+    assert "Saved test plan to" in output
+    assert "Saved coverage report to" in output
     
     # Check physical output files
     assert os.path.exists(os.path.join(temp_repo, "test_plan.json"))

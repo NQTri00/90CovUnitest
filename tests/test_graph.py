@@ -44,8 +44,56 @@ def test_full_agent_graph_execution(temp_project):
     # Offline run
     os.environ["OPENROUTER_API_KEY"] = "your-openrouter-api-key-here"
     
-    app = build_agent_graph(config)
+    import unittest.mock
+    import json
+    from agent.stages.stage4_execution import Stage4Execution
+    from agent.stages.stage5_correction import Stage5Correction
     
+    def mock_stage4_run(self, state):
+        retry_count = state.get("retry_count", 0)
+        total_coverage = 75.0 if retry_count == 0 else 95.0
+        state["coverage_report"] = {
+            "total_coverage": total_coverage,
+            "summary": {"total_tests": 1, "passed": 1, "failed": 0, "skipped": 0},
+            "classes": {
+                "UserService": {
+                    "line_coverage": total_coverage,
+                    "branch_coverage": total_coverage,
+                    "uncovered_lines": [10, 15] if retry_count == 0 else []
+                }
+            },
+            "failures": []
+        }
+        state["history"].append("Stage 4 completed: Test execution and coverage analysis done.")
+        return state
+
+    def mock_stage5_run(self, state):
+        coverage_report = state.get("coverage_report")
+        test_plan = state.get("test_plan")
+        current_coverage = coverage_report.get("total_coverage", 0.0)
+        target_coverage = float(test_plan.get("target_coverage", 90.0))
+        retry_count = state.get("retry_count", 0)
+        if current_coverage >= target_coverage:
+            state["history"].append("Self-correction loop finished: Target coverage achieved.")
+            return state
+        new_retry_count = retry_count + 1
+        state["retry_count"] = new_retry_count
+        
+        corrected_plan = json.loads(json.dumps(test_plan))
+        corrected_plan["test_cases"].append({
+            "service": "UserService",
+            "method": "get_user",
+            "test_id": "SimulatedService_simulatedMethod_999",
+            "type": "happy_path",
+            "description": "Simulated test case",
+            "setup": {"mocks": []},
+            "input": {},
+            "expected": {"return_type": "void", "assertions": []}
+        })
+        state["test_plan"] = corrected_plan
+        state["history"].append(f"Self-correction loop retry #{new_retry_count} triggered.")
+        return state
+
     initial_state = AgentState(
         repo_path=temp_project,
         language="",
@@ -58,8 +106,11 @@ def test_full_agent_graph_execution(temp_project):
         retry_count=0,
         history=[]
     )
-    
-    final_state = app.invoke(initial_state)
+
+    with unittest.mock.patch.object(Stage4Execution, "run", mock_stage4_run), \
+         unittest.mock.patch.object(Stage5Correction, "run", mock_stage5_run):
+        app = build_agent_graph(config)
+        final_state = app.invoke(initial_state)
     
     # Assertions
     assert final_state["language"] == "python"

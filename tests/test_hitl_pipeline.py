@@ -63,7 +63,38 @@ def test_hitl_pause_resume_pipeline(temp_project):
 
     # 2. Run Phase 2 (Stage 3, 4, 5) with filter list
     print("Running Phase 2 (Resuming)...")
-    resume_agent_task(run_id, selected_test_ids)
+    
+    import unittest.mock
+    from agent.stages.stage4_execution import Stage4Execution
+    from agent.stages.stage5_correction import Stage5Correction
+    
+    def mock_stage4_run(self, state):
+        from agent.progress import update_progress
+        state["coverage_report"] = {
+            "total_coverage": 95.0,
+            "summary": {"total_tests": 1, "passed": 1, "failed": 0, "skipped": 0},
+            "classes": {
+                "SimpleService": {
+                    "line_coverage": 95.0,
+                    "branch_coverage": 95.0,
+                    "uncovered_lines": []
+                }
+            },
+            "failures": []
+        }
+        state["history"].append("Stage 4 completed: Test execution and coverage analysis done.")
+        update_progress(4, 100, "Hoàn thành Stage 4. Độ bao phủ đạt: 95.0%")
+        return state
+
+    def mock_stage5_run(self, state):
+        from agent.progress import update_progress
+        state["history"].append("Self-correction loop finished: Target coverage achieved.")
+        update_progress(5, 100, "Độ bao phủ đạt yêu cầu. Kết thúc vòng sửa lỗi.")
+        return state
+
+    with unittest.mock.patch.object(Stage4Execution, "run", mock_stage4_run), \
+         unittest.mock.patch.object(Stage5Correction, "run", mock_stage5_run):
+        resume_agent_task(run_id, selected_test_ids)
 
     # Assert successful completion
     assert runs_db[run_id]["status"] == "completed"

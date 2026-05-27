@@ -1,6 +1,7 @@
 let currentRunId = null;
 let pollInterval = null;
 let currentFiles = [];
+let currentReportContent = "";
 
 // Window management: Drag-and-drop mechanics
 let activeWindow = null;
@@ -694,6 +695,27 @@ function showDashboard(data) {
             selectFile(0);
         }
     }
+
+    // 6. Handle Markdown Report
+    const reportViewer = document.getElementById("reportViewer");
+    const btnTabReport = document.getElementById("btn-tab-report");
+    if (data.report) {
+        currentReportContent = data.report;
+        if (reportViewer) {
+            reportViewer.innerHTML = renderMarkdownToHtml(data.report);
+        }
+        if (btnTabReport) {
+            btnTabReport.style.display = "inline-block";
+        }
+    } else {
+        currentReportContent = "";
+        if (reportViewer) {
+            reportViewer.innerHTML = "<p style='color:#888; text-align:center;'>Không có báo cáo kiểm thử nào.</p>";
+        }
+        if (btnTabReport) {
+            btnTabReport.style.display = "none";
+        }
+    }
 }
 
 function selectFile(index) {
@@ -761,6 +783,99 @@ function escapeHtml(str) {
               .replace(/>/g, "&gt;")
               .replace(/"/g, "&quot;")
               .replace(/'/g, "&#039;");
+}
+
+function renderMarkdownToHtml(mdText) {
+    if (!mdText) return "<p style='color: #888; text-align: center;'>Chưa có báo cáo.</p>";
+    
+    // First escape the HTML to avoid any script injections
+    let html = escapeHtml(mdText);
+    
+    // Convert headers
+    html = html.replace(/^# (.*?)$/gm, '<h1 style="color: var(--purple); font-family: \'Silkscreen\', monospace; font-size: 1.1rem; margin-top: 12px; margin-bottom: 8px; border-bottom: 2px double var(--purple); padding-bottom: 4px;">$1</h1>');
+    html = html.replace(/^## (.*?)$/gm, '<h2 style="color: var(--purple); font-family: \'Silkscreen\', monospace; font-size: 0.88rem; margin-top: 14px; margin-bottom: 6px; border-bottom: 1px solid var(--purple); padding-bottom: 2px;">$1</h2>');
+    html = html.replace(/^### (.*?)$/gm, '<h3 style="color: var(--pink); font-family: \'Zen Maru Gothic\', sans-serif; font-size: 0.8rem; font-weight: bold; margin-top: 10px; margin-bottom: 4px;">$1</h3>');
+    
+    // Convert bold text
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert inline code
+    html = html.replace(/`(.*?)`/g, '<code style="background: rgba(124, 97, 165, 0.1); color: var(--purple); padding: 1px 4px; font-family: \'JetBrains Mono\', monospace; font-size: 0.72rem; border-radius: 2px;">$1</code>');
+    
+    // Convert lists
+    html = html.replace(/^- (.*?)$/gm, '<li style="margin-left: 14px; margin-bottom: 3px; font-size: 0.76rem;">$1</li>');
+    html = html.replace(/^\d+\. (.*?)$/gm, '<li style="margin-left: 14px; margin-bottom: 3px; list-style-type: decimal; font-size: 0.76rem;">$1</li>');
+
+    // Parse tables
+    const lines = html.split('\n');
+    let inTable = false;
+    let tableHtml = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (line.startsWith('|') && line.endsWith('|')) {
+            if (line.includes('---')) {
+                // Separator row, skip it
+                lines[i] = '';
+                continue;
+            }
+            
+            // Extract cell values
+            const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+            
+            if (!inTable) {
+                inTable = true;
+                tableHtml = '<table class="data-table" style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.72rem; border: 1.5px solid var(--purple);">';
+                tableHtml += '<thead><tr style="background: var(--light-pink);">';
+                cells.forEach(cell => {
+                    tableHtml += `<th style="padding: 4px 6px; border: 1px solid var(--purple); color: var(--purple); font-weight: bold; text-align: left;">${cell}</th>`;
+                });
+                tableHtml += '</tr></thead><tbody>';
+                lines[i] = '';
+            } else {
+                let rowHtml = '<tr style="border-bottom: 1px solid #eee;">';
+                cells.forEach(cell => {
+                    rowHtml += `<td style="padding: 4px 6px; border: 1px solid #ddd;">${cell}</td>`;
+                });
+                rowHtml += '</tr>';
+                lines[i] = rowHtml;
+            }
+        } else {
+            if (inTable) {
+                inTable = false;
+                lines[i] = '</tbody></table>' + lines[i];
+            }
+        }
+    }
+    
+    html = lines.join('\n');
+    
+    // Replace double newlines or single newlines with br (but skip replacing inside HTML tags like tables/lists)
+    const linesAfter = html.split('\n');
+    for (let i = 0; i < linesAfter.length; i++) {
+        let line = linesAfter[i];
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.includes('<table') && !trimmed.includes('<thead') && !trimmed.includes('<tbody') && !trimmed.includes('<tr') && !trimmed.includes('<th') && !trimmed.includes('<td') && !trimmed.includes('</table') && !trimmed.includes('</thead') && !trimmed.includes('</tbody') && !trimmed.includes('</tr') && !trimmed.includes('</th') && !trimmed.includes('</td') && !trimmed.includes('<li') && !trimmed.includes('</li')) {
+            linesAfter[i] = line + '<br>';
+        }
+    }
+    html = linesAfter.join('\n');
+    
+    return html;
+}
+
+function downloadReport() {
+    if (!currentReportContent) {
+        alert("Chưa có báo cáo kiểm thử để tải xuống!");
+        return;
+    }
+    const blob = new Blob([currentReportContent], { type: 'text/markdown;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `test_report_${currentRunId || 'agent'}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 let currentBrowsingPath = "";

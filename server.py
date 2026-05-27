@@ -169,6 +169,70 @@ def run_agent_task(run_id: str, repo_path: str):
     finally:
         current_run_id.reset(token)
 
+def generate_markdown_report(run_id: str, state: Dict[str, Any], repo_path: str) -> str:
+    language = state.get("language", "N/A")
+    framework = state.get("framework", "N/A")
+    coverage_report = state.get("coverage_report", {})
+    total_coverage = coverage_report.get("total_coverage", 0.0)
+    summary = coverage_report.get("summary", {})
+    passed = summary.get("passed", 0)
+    failed = summary.get("failed", 0)
+    total_tests = summary.get("total_tests", 0)
+    
+    test_plan = state.get("test_plan", {})
+    test_cases = test_plan.get("test_cases", [])
+    retry_count = state.get("retry_count", 0)
+    history = state.get("history", [])
+    
+    md = []
+    md.append(f"# ✦ BÁO CÁO PHÂN TÍCH QUÁ TRÌNH KIỂM THỬ ✦\\n")
+    md.append(f"**Mã tiến trình (Run ID):** `{run_id}`  ")
+    md.append(f"**Thư mục dự án:** `{repo_path}`  ")
+    md.append(f"**Ngôn ngữ lập trình:** `{language.upper()}` | **Framework:** `{framework.upper()}`\\n")
+    
+    md.append(f"## 📊 Kết Quả Tổng Quan")
+    md.append(f"- **Độ bao phủ đạt được (Coverage):** `{total_coverage}%` (Mục tiêu tối thiểu: `{test_plan.get('target_coverage', 90.0)}%`)")
+    md.append(f"- **Tổng số ca kiểm thử:** `{total_tests if total_tests else len(test_cases)}`")
+    md.append(f"- **Trạng thái:** `{passed} Thành công / {failed} Thất bại`")
+    md.append(f"- **Số vòng lặp tự sửa lỗi (Self-Correction Loops):** `{retry_count}`\\n")
+    
+    md.append(f"## 📋 Danh Sách Kịch Bản Kiểm Thử Đã Sinh")
+    md.append(f"| Dịch vụ | Phương thức | Phân loại | Mô tả kịch bản |")
+    md.append(f"| --- | --- | --- | --- |")
+    for tc in test_cases:
+        service_name = tc.get('service', 'N/A')
+        method_name = tc.get('method', 'N/A')
+        tc_type = tc.get('type', 'N/A')
+        desc = tc.get('description', '')
+        md.append(f"| `{service_name}` | `{method_name}` | `{tc_type}` | {desc} |")
+    md.append("")
+    
+    md.append(f"## 🔄 Lịch Sử Các Bước Thực Hiện")
+    for idx, h in enumerate(history):
+        md.append(f"- **Bước {idx+1}:** {h}")
+    md.append("")
+    
+    md.append(f"## 🛠️ Đánh Giá Chi Tiết & Khuyến Nghị")
+    if failed > 0:
+        md.append(f"### ⚠️ Một số kiểm thử bị lỗi:")
+        failures = coverage_report.get("failures", [])
+        if failures:
+            for f in failures:
+                md.append(f"- **Kiểm thử:** `{f.get('test_name')}`")
+                md.append(f"  - **Thông báo lỗi:** `{f.get('message')}`")
+        else:
+            md.append(f"- Có `{failed}` ca kiểm thử không vượt qua. Vui lòng kiểm tra lại cấu hình mock hoặc dependencies của dịch vụ.")
+    else:
+        md.append(f"### 💚 Hoàn tất hoàn hảo:")
+        md.append(f"- Tất cả các kiểm thử đã chạy qua thành công (`{passed}/{total_tests}`).")
+        md.append(f"- Độ bao phủ code đã đáp ứng và vượt mức tiêu chuẩn an toàn đề ra.")
+        
+    import datetime
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    md.append(f"\\n*Báo cáo được sinh tự động bởi KAngel Unit Test Agent vào lúc {now_str}*")
+    
+    return "\n".join(md)
+
 def resume_agent_task(run_id: str, selected_test_ids: List[str]):
     import yaml
     from agent.stages.stage3_generation import Stage3Generation
@@ -235,6 +299,14 @@ def resume_agent_task(run_id: str, selected_test_ids: List[str]):
         runs_db[run_id]["test_plan"] = state.get("test_plan", {})
         runs_db[run_id]["coverage_report"] = state.get("coverage_report", {})
         runs_db[run_id]["history"] = state.get("history", [])
+
+        # Generate markdown report
+        try:
+            report_md = generate_markdown_report(run_id, state, abs_repo_path)
+            runs_db[run_id]["report"] = report_md
+        except Exception as re:
+            logger.error(f"Failed to generate test report: {re}")
+            runs_db[run_id]["report"] = f"# Error generating report\n\n{re}"
 
         # Load generated test files content
         generated_files = []

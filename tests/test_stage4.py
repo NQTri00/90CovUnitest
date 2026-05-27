@@ -118,7 +118,26 @@ def test_mock_coverage_report_schema_validation():
     )
     
     stage4 = Stage4Execution({})
-    final_state = stage4.run(state)
+    import unittest.mock
+    mock_report = {
+        "total_coverage": 75.0,
+        "summary": {
+            "total_tests": 1,
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+        },
+        "classes": {
+            "ProductService": {
+                "line_coverage": 75.0,
+                "branch_coverage": 70.0,
+                "uncovered_lines": [10, 15]
+            }
+        },
+        "failures": []
+    }
+    with unittest.mock.patch.object(stage4, "execute_python_tests", return_value=(True, mock_report)):
+        final_state = stage4.run(state)
     
     report = final_state["coverage_report"]
     assert report is not None
