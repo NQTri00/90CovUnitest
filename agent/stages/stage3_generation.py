@@ -198,13 +198,58 @@ class Stage3Generation:
         """
         Extract content inside ```lang ... ``` or return text if no block found.
         """
+        if not text:
+            return None
+            
+        # Try to find standard closed code blocks first
         pattern = rf"```(?:{lang})?\s*(.*?)\s*```"
         match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
         if match:
             return match.group(1).strip()
-        # Fallback in case LLM didn't wrap but returned just code
+            
+        # Check if there is an unclosed code block (common on truncation)
+        start_patterns = [
+            rf"```(?:{lang})\b",
+            rf"```"
+        ]
+        for start_pat in start_patterns:
+            match_start = re.search(start_pat, text, re.IGNORECASE)
+            if match_start:
+                start_idx = match_start.end()
+                code_part = text[start_idx:].strip()
+                if "```" in code_part:
+                    code_part = code_part.split("```")[0].strip()
+                return code_part
+
+        # Fallback: if no code block markers at all, try to find the first occurrence of import / package
+        # and strip any conversational prefix.
+        lines = text.splitlines()
+        code_lines = []
+        started = False
+        for line in lines:
+            if started:
+                code_lines.append(line)
+            else:
+                stripped = line.strip()
+                if (
+                    stripped.startswith("import ") or 
+                    stripped.startswith("from ") or 
+                    stripped.startswith("def ") or 
+                    stripped.startswith("class ") or 
+                    stripped.startswith("package ") or 
+                    stripped.startswith("public class ") or
+                    stripped.startswith("@")
+                ):
+                    started = True
+                    code_lines.append(line)
+                    
+        if code_lines:
+            return "\n".join(code_lines).strip()
+            
+        # Last resort fallback
         if "package " in text or "import " in text or "def test_" in text:
             return text.strip()
+            
         return None
 
     def check_syntax(self, code: str, language: str) -> Tuple[bool, str]:

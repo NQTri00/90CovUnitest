@@ -98,14 +98,28 @@ class Stage4Execution:
         if req_path:
             logger.info(f"Installing project dependencies from {req_path}...")
             try:
-                subprocess.run(
-                    ["pip", "install", "--no-cache-dir", "-r", req_path],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=120
-                )
-                logger.info("Dependencies installed successfully.")
+                with open(req_path, "r", encoding="utf-8", errors="ignore") as f:
+                    reqs = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+                
+                for req in reqs:
+                    pkg_name = req.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].strip()
+                    if not pkg_name:
+                        continue
+                    if pkg_name.lower() == "pyaudiowpatch":
+                        logger.info(f"Skipping Windows-only package: {pkg_name}")
+                        continue
+                    try:
+                        logger.info(f"Installing package: {req}...")
+                        subprocess.run(
+                            ["pip", "install", "--no-cache-dir", req],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            timeout=60
+                        )
+                    except Exception as pkg_err:
+                        logger.warning(f"Failed to install package {req}: {pkg_err}")
+                logger.info("Finished installing dependencies.")
             except Exception as e:
                 logger.error(f"Failed to install dependencies: {e}")
 
