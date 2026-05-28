@@ -1,4 +1,4 @@
-name: Build and Test Agent
+name: Run Unit Test Agent on Demo Project
 
 on:
   push:
@@ -6,37 +6,35 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  run-agent:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository code
+      # 1. Checkout the target repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Build the Docker image of the agent
-      - name: Build Docker Image
-        run: |
-          docker build -t 90covunitest:latest ./90CovUnitest
-
-      # 3. Run the Unit Test Agent on the demo_project inside Docker
-      - name: Run Agent on demo_project
+      # 2. Pull and run the Unit Test Agent from GHCR
+      - name: Run Agent inside Docker container
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
+          # Convert github.repository_owner to lowercase for docker compatibility
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          
           docker run --rm \
-            -v ${{ github.workspace }}/90CovUnitest/demo_project:/app/demo_project \
+            -v ${{ github.workspace }}/demo_project:/app/demo_project \
             -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
-            90covunitest:latest \
+            ghcr.io/$OWNER_LC/90covunitest:latest \
             python main.py --repo demo_project
 
-      # 4. Upload Generated Tests and Reports as Workflow Artifacts
+      # 3. Upload Generated Tests and Reports as Workflow Artifacts
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: demo-project-results
           path: |
-            90CovUnitest/demo_project/generated_tests/
-            90CovUnitest/demo_project/coverage_report.json
-            90CovUnitest/demo_project/test_plan.json
+            demo_project/generated_tests/
+            demo_project/coverage_report.json
+            demo_project/test_plan.json
