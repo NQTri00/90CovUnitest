@@ -122,10 +122,10 @@ class Stage1Analysis:
                 sanitized = None
                 if llm_result:
                     sanitized = self.sanitize_service_metadata(llm_result, file_path)
-                    if not sanitized.get("methods"):
+                    if not sanitized.get("methods") and local_parse.get("methods"):
                         logger.warning(
                             f"Service {sanitized.get('class_name')} has no methods after sanitize "
-                            f"(LLM may have returned incomplete data). Falling back to local AST."
+                            f"(LLM may have returned incomplete data but AST found methods). Falling back to local AST."
                         )
                         sanitized = self.sanitize_service_metadata(local_parse, file_path)
                 else:
