@@ -36,8 +36,19 @@ class Stage1Analysis:
         update_progress(1, 15, f"Đã nhận diện: {language.upper()} ({framework.upper()})")
 
         # Step 1.2: Source File Discovery
-        service_files = self.discover_service_files(repo_path, language)
-        logger.info(f"Discovered {len(service_files)} service files to analyze.")
+        passed_files = state.get("service_files", [])
+        if passed_files:
+            service_files = []
+            for f in passed_files:
+                abs_f = os.path.abspath(f) if os.path.isabs(f) else os.path.abspath(os.path.join(repo_path, f))
+                if os.path.exists(abs_f):
+                    rel_f = os.path.relpath(abs_f, repo_path).replace("\\", "/")
+                    service_files.append(rel_f)
+            logger.info(f"Using {len(service_files)} specified target files: {service_files}")
+        else:
+            service_files = self.discover_service_files(repo_path, language)
+            logger.info(f"Discovered {len(service_files)} service files to analyze.")
+
         update_progress(1, 20, f"Đã phát hiện {len(service_files)} tệp tin cần phân tích.", {"service_files": service_files})
 
         services_metadata = []

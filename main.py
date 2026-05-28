@@ -41,6 +41,12 @@ def main():
         default="config.yaml",
         help="Đường dẫn tới file config.yaml"
     )
+    parser.add_argument(
+        "--files",
+        type=str,
+        nargs="*",
+        help="Danh sách các file cụ thể cần sinh test (nếu chỉ muốn chạy trên file thay đổi)"
+    )
     args = parser.parse_args()
 
     repo_path = os.path.abspath(args.repo)
@@ -56,12 +62,17 @@ def main():
     # Build graph application
     app = build_agent_graph(config)
 
+    # Get specific files if passed
+    service_files = []
+    if args.files:
+        service_files = args.files
+
     # Prepare initial state
     initial_state = AgentState(
         repo_path=repo_path,
         language="",
         framework="",
-        service_files=[],
+        service_files=service_files,
         analysis_result=None,
         test_plan=None,
         generated_tests=[],
