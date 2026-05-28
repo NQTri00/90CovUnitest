@@ -94,7 +94,9 @@ class Stage2Planning:
                 test_plan = self.generate_local_fallback_plan(analysis_result)
 
         # Sanitize test plan to comply with schema constraints
-        if test_plan and "test_cases" in test_plan:
+        if test_plan and "test_cases" in test_plan and isinstance(test_plan["test_cases"], list):
+            # Keep only valid dict structures in test_cases list
+            test_plan["test_cases"] = [tc for tc in test_plan["test_cases"] if isinstance(tc, dict)]
             for tc in test_plan["test_cases"]:
                 # Ensure service, method, test_id, description are strings and not None
                 for field in ["service", "method", "test_id", "description", "type"]:
