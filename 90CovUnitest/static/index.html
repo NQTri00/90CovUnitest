@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✦ KAngel's Unit Test Agent ✦ ~ needy code overdose ~</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Scanlines overlay for retro CRT look -->
+    <div class="scanlines"></div>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    
+    <!-- Desktop Decorative Left Side Border -->
+    <div class="desktop-decor-side decor-left">
+        <div class="decor-item ribbon">🎀</div>
+        <div class="decor-item cat">🐱</div>
+        <div class="decor-item moon">🌙</div>
+        <div class="decor-item star">⭐</div>
+        <div class="decor-item pill">💊</div>
+        <div class="decor-item heart">💖</div>
+        <div class="decor-item lipstick">💄</div>
+        <div class="decor-item ribbon">🎀</div>
+        <div class="decor-item cat">🐱</div>
+        <div class="decor-item moon">🌙</div>
+        <div class="decor-item star">⭐</div>
+        <div class="decor-item pill">💊</div>
+    </div>
+    
+    <!-- Desktop Decorative Right Side Border -->
+    <div class="desktop-decor-side decor-right">
+        <div class="decor-item ribbon">🎀</div>
+        <div class="decor-item cat">🐱</div>
+        <div class="decor-item moon">🌙</div>
+        <div class="decor-item star">⭐</div>
+        <div class="decor-item pill">💊</div>
+        <div class="decor-item heart">💖</div>
+        <div class="decor-item lipstick">💄</div>
+        <div class="decor-item ribbon">🎀</div>
+        <div class="decor-item cat">🐱</div>
+        <div class="decor-item moon">🌙</div>
+        <div class="decor-item star">⭐</div>
+        <div class="decor-item pill">💊</div>
+    </div>
+
+    <!-- Main Desktop Layout -->
+    <div class="desktop-container">
+        
+        <!-- Desktop Shortcuts -->
+        <div class="desktop-shortcuts">
+            <div class="shortcut" onclick="toggleWindow('window-haishin')">
+                <div class="shortcut-icon icon-netube">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <rect x="2" y="4" width="20" height="16" rx="4" fill="#ff4d6d" stroke="#fff" stroke-width="2"/>
+                        <polygon points="10,9 16,12 10,15" fill="#fff"/>
+                    </svg>
+                </div>
+                <div class="shortcut-label">Netube</div>
+            </div>
+            
+            <div class="shortcut" onclick="toggleWindow('window-settings')">
+                <div class="shortcut-icon icon-potion">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <path d="M12,2 L12,6 M8,6 L16,6 M7,10 L17,10 L19,21 L5,21 Z" fill="#6c5ce7" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+                        <circle cx="12" cy="14" r="2" fill="#a29bfe"/>
+                        <circle cx="9" cy="17" r="1.5" fill="#a29bfe"/>
+                        <circle cx="15" cy="17" r="1.5" fill="#a29bfe"/>
+                    </svg>
+                </div>
+                <div class="shortcut-label">/st/</div>
+            </div>
+            
+            <div class="shortcut" onclick="toggleWindow('window-taskmanager')">
+                <div class="shortcut-icon icon-tweeter">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <path d="M23,3 A10.9,10.9,0,0,1,20,4 A5,5,0,0,0,22,1 A10.9,10.9,0,0,1,19,2 A5,5,0,0,0,10,6 A15,15,0,0,1,1,2 A5,5,0,0,0,2.5,8.5 A5,5,0,0,1,0.2,7.9 A5,5,0,0,0,4.2,12.8 A5,5,0,0,1,2,12.9 A5,5,0,0,0,6.7,16.3 A10,10,0,0,1,0,18.5 A15,15,0,0,0,8,21 A15,15,0,0,0,23,6 A10,10,0,0,0,23,3 Z" fill="#74b9ff" stroke="#fff" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="shortcut-label">Tweeter</div>
+            </div>
+            
+            <div class="shortcut" onclick="toggleWindow('window-codeexplorer')">
+                <div class="shortcut-icon icon-dinder">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <path d="M12,2 C12,2 17,6 17,11 C17,15 14,19 12,22 C10,19 7,15 7,11 C7,6 12,2 12,2 Z" fill="#ff7675" stroke="#fff" stroke-width="2"/>
+                        <path d="M12,7 C12,7 14,9 14,12 C14,14 13,16 12,18 C11,16 10,14 10,12 C10,9 12,7 12,7 Z" fill="#ffeaa7"/>
+                    </svg>
+                </div>
+                <div class="shortcut-label">Dinder</div>
+            </div>
+            
+            <div class="shortcut" onclick="openHelp()">
+                <div class="shortcut-icon icon-goout">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <circle cx="12" cy="12" r="9" fill="#00b894" stroke="#fff" stroke-width="2"/>
+                        <path d="M12,2 L12,22 M2,12 L22,12 M12,7 L17,12 L12,17 L7,12 Z" stroke="#fff" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </div>
+                <div class="shortcut-label">Go Out</div>
+            </div>
+        </div>
+
+        <!-- 1. webcam Window (Standby Screen) -->
+        <div class="retro-window window-inactive" id="window-webcam" style="top: 30px; left: 240px; width: 380px; height: 280px; z-index: 10;">
+            <div class="window-header" onmousedown="focusWindow('window-webcam', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">webcam</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-min" onclick="minimizeWindow('window-webcam')">_</button>
+                    <button class="win-btn win-max" onclick="maximizeWindow('window-webcam')">[ ]</button>
+                    <button class="win-btn win-close" onclick="closeWindow('window-webcam')">X</button>
+                </div>
+            </div>
+            <div class="window-body webcam-body">
+                <div class="webcam-overlay-text">● STDBY</div>
+                <div class="webcam-retro-grid"></div>
+                <div class="webcam-placeholder">
+                    <div class="webcam-static-noise"></div>
+                    <div class="webcam-standby-logo">KAngel Offline</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. haishin Window (Main Stream & Logs Chat) -->
+        <div class="retro-window" id="window-haishin" style="top: 80px; left: 160px; width: 780px; height: 520px; z-index: 20;">
+            <div class="window-header" onmousedown="focusWindow('window-haishin', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">haishin</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-min" onclick="minimizeWindow('window-haishin')">_</button>
+                    <button class="win-btn win-max" onclick="maximizeWindow('window-haishin')">[ ]</button>
+                    <button class="win-btn win-close" onclick="closeWindow('window-haishin')">X</button>
+                </div>
+            </div>
+            <div class="window-body haishin-body">
+                <div class="haishin-layout">
+                    
+                    <!-- Left: Stream Video -->
+                    <div class="haishin-video-panel">
+                        <div class="video-container">
+                            <img src="/static/kangel_stream.png" alt="KAngel Stream" class="video-stream-img">
+                            <div class="video-overlay-live">● LIVE</div>
+                            
+                            <!-- Video controls bar -->
+                            <div class="video-controls-bar">
+                                <button class="video-play-btn">▶</button>
+                                <div class="video-timeline">
+                                    <div class="video-timeline-fill" id="streamTimeline"></div>
+                                </div>
+                                <div class="video-control-icons">
+                                    <span>⚙️</span>
+                                    <span>🎚️</span>
+                                    <span>⛶</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stream-info">
+                            <h2 class="stream-title" id="streamTitleText">Story Time with OMGkawaiiAngel</h2>
+                            <div class="stream-stats-text">
+                                <span class="watching-count" id="watchingCount">900</span> watching now • Started streaming on <span id="streamDay">DAY 1</span>
+                            </div>
+                            <div class="stream-dots-indicator">
+                                <span></span><span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Chat Box (mapped to Console Logs) -->
+                    <div class="haishin-chat-panel">
+                        <div class="chat-header">
+                            <span class="chat-title">♡ Chat room ♡</span>
+                            <span class="status-badge" id="runStatus">Idle zzz...</span>
+                        </div>
+                        <div class="chat-messages" id="terminalLogs">
+                            <div class="log-line system-line">> ✿ Sẵn sàng chạy Unit Test Agent~ Nhập đường dẫn thư mục và bấm nút Khởi chạy nha ♡</div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" class="chat-input" placeholder="Type a message..." disabled>
+                            <button class="chat-send-btn" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Task Manager Window (Stats & Progress) -->
+        <div class="retro-window" id="window-taskmanager" style="top: 40px; left: 880px; width: 330px; z-index: 15;">
+            <div class="window-header" onmousedown="focusWindow('window-taskmanager', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">Task Manager</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-min" onclick="minimizeWindow('window-taskmanager')">_</button>
+                    <button class="win-btn win-max" onclick="maximizeWindow('window-taskmanager')">[ ]</button>
+                    <button class="win-btn win-close" onclick="closeWindow('window-taskmanager')">X</button>
+                </div>
+            </div>
+            <div class="window-body taskmanager-body">
+                <div class="stats-manager-grid">
+                    
+                    <!-- Followers (Coverage) -->
+                    <div class="stat-box box-followers">
+                        <div class="stat-label">Followers</div>
+                        <div class="stat-val-wrapper">
+                            <div class="stat-val" id="displayFollowers">0%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mental Status (Current Stage/State) -->
+                    <div class="stat-box box-mental">
+                        <div class="stat-label">Mental Status</div>
+                        <div class="stat-val-wrapper bg-grid-dark">
+                            <div class="stat-val small-font text-blink" id="displayMental">On the brink</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stress (Failed Tests Count) -->
+                    <div class="stat-box box-stress">
+                        <div class="stat-label">Stress</div>
+                        <div class="stat-val-wrapper">
+                            <div class="stat-val" id="displayStress">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Affection (Passed Tests Count) -->
+                    <div class="stat-box box-affection">
+                        <div class="stat-label">Affection</div>
+                        <div class="stat-val-wrapper bg-grid-dark">
+                            <div class="stat-val small-font" id="displayAffection">MAX</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real-time Progress Bar Container (inside Task Manager) -->
+                <div id="progressContainer" class="task-progress-container" style="display: none;">
+                    <div class="progress-info">
+                        <span id="progressMessage" class="progress-message">Đang phân tích mã nguồn...</span>
+                        <span id="progressPercent" class="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="progressBarFill" class="progress-bar-fill"></div>
+                    </div>
+                    <div id="progressSubDetail" class="progress-sub-detail"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. System Config Window (Repo Selection & Stepper stages) -->
+        <div class="retro-window" id="window-settings" style="top: 350px; left: 200px; width: 440px; height: 420px; z-index: 25;">
+            <div class="window-header" onmousedown="focusWindow('window-settings', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">Settings - Config</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-min" onclick="minimizeWindow('window-settings')">_</button>
+                    <button class="win-btn win-max" onclick="maximizeWindow('window-settings')">[ ]</button>
+                    <button class="win-btn win-close" onclick="closeWindow('window-settings')">X</button>
+                </div>
+            </div>
+            <div class="window-body settings-body">
+                
+                <!-- Repository path configuration -->
+                <div class="settings-group">
+                    <div class="settings-title-bar">📂 Repository Configuration</div>
+                    
+                    <div class="form-group" style="position: relative; margin-top: 10px;">
+                        <label for="repoPath">Đường dẫn Repository (trên Localhost)</label>
+                        <div class="input-with-button">
+                            <div class="select-wrapper" style="position: relative; display: flex; flex: 1; align-items: center;">
+                                <input type="text" id="repoPath" placeholder="Ví dụ: demo_project ♡" value="demo_project" style="width: 100%; padding-right: 40px;">
+                                <button id="btnBrowse" onclick="toggleDirBrowser(event)" title="Chọn thư mục" style="position: absolute; right: 5px; background: transparent; border: none; font-size: 1.1rem; cursor: pointer; padding: 6px; box-shadow: none; color: var(--purple);">📁</button>
+                            </div>
+                            <button id="btnRun" onclick="startAgentRun()" class="btn-kawaii">
+                                <span class="btn-sparkle">✦</span> Khởi chạy <span class="btn-sparkle">✦</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Directory Browser Dropdown -->
+                        <div id="dirBrowserDropdown" class="dir-browser-dropdown" style="display: none;">
+                            <div class="dir-browser-header">
+                                <span id="currentBrowsingPath">/app</span>
+                                <button onclick="navigateUpDir(event)" id="btnDirUp" disabled>⬆️ Lên</button>
+                            </div>
+                            <div class="dir-list" id="browserDirList">
+                                <!-- Folders list -->
+                            </div>
+                        </div>
+                        <p class="input-help">Note: Thư mục cần nằm trong workspace hoặc map Docker.</p>
+                    </div>
+                </div>
+
+                <!-- Clone GitHub Repository -->
+                <div class="settings-group" style="margin-top: 15px;">
+                    <div class="settings-title-bar">🐙 Clone GitHub Repository</div>
+                    
+                    <div class="form-group" style="position: relative; margin-top: 10px;">
+                        <label for="githubUrl">Đường dẫn GitHub Repository</label>
+                        <div class="input-with-button">
+                            <input type="text" id="githubUrl" placeholder="Ví dụ: https://github.com/user/repo.git ♡" style="flex: 1; padding: 6px; font-size: 0.8rem;">
+                            <button id="btnCloneRun" onclick="startGithubCloneRun()" class="btn-kawaii">
+                                <span class="btn-sparkle">✦</span> Clone & Run <span class="btn-sparkle">✦</span>
+                            </button>
+                        </div>
+                        <p class="input-help">Note: Mã nguồn sẽ được clone về thư mục <code>projects/</code>.</p>
+                    </div>
+                </div>
+                
+                <!-- Stepper Stages Progress -->
+                <div class="settings-group" style="margin-top: 15px;">
+                    <div class="settings-title-bar">🌸 Pipeline Execution Steps</div>
+                    <div class="stepper" style="margin-top: 10px;">
+                        <div class="step" id="step-stage1">
+                            <div class="step-icon">♡</div>
+                            <div class="step-info">
+                                <span class="step-name">Stage 1: Code Analysis</span>
+                                <span class="step-desc">Phân tích AST & Metadata dịch vụ</span>
+                            </div>
+                            <div class="step-status-icon"></div>
+                        </div>
+                        <div class="step" id="step-stage2">
+                            <div class="step-icon">♡</div>
+                            <div class="step-info">
+                                <span class="step-name">Stage 2: Test Planning</span>
+                                <span class="step-desc">Lên kế hoạch các kịch bản kiểm thử</span>
+                            </div>
+                            <div class="step-status-icon"></div>
+                        </div>
+                        <div class="step" id="step-stage3">
+                            <div class="step-icon">♡</div>
+                            <div class="step-info">
+                                <span class="step-name">Stage 3: Test Generation</span>
+                                <span class="step-desc">Sinh mã nguồn kiểm thử tự động</span>
+                            </div>
+                            <div class="step-status-icon"></div>
+                        </div>
+                        <div class="step" id="step-stage4">
+                            <div class="step-icon">♡</div>
+                            <div class="step-info">
+                                <span class="step-name">Stage 4: Execution & Coverage</span>
+                                <span class="step-desc">Chạy thử nghiệm & phân tích độ phủ</span>
+                            </div>
+                            <div class="step-status-icon"></div>
+                        </div>
+                        <div class="step" id="step-stage5">
+                            <div class="step-icon">♡</div>
+                            <div class="step-info">
+                                <span class="step-name">Stage 5: Self-Correction Loop</span>
+                                <span class="step-desc">Phản hồi & tối ưu độ bao phủ</span>
+                            </div>
+                            <div class="step-status-icon"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Test Selector Window (HITL Selection Table) - Starts hidden -->
+        <div class="retro-window" id="selectionPanel" style="display: none; top: 150px; left: 320px; width: 680px; z-index: 100;">
+            <div class="window-header" onmousedown="focusWindow('selectionPanel', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">Test Case Selection</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-close" onclick="closeWindow('selectionPanel')">X</button>
+                </div>
+            </div>
+            <div class="window-body selector-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="selector-title">📋✨ Chọn Test Case muốn sinh Code nè~</span>
+                    <div style="font-size: 0.8rem; display: flex; gap: 8px;">
+                        <button id="btnSelectAll" class="win-btn-action" onclick="toggleSelectAllTestCases(true)">Chọn hết ♡</button>
+                        <button id="btnDeselectAll" class="win-btn-action" onclick="toggleSelectAllTestCases(false)">Bỏ chọn ✗</button>
+                    </div>
+                </div>
+                <p class="selector-help">
+                    ✿ Hệ thống đã thiết lập xong các kịch bản kiểm thử rồi đó~ Tích chọn những kịch bản bạn muốn sinh mã nha:
+                </p>
+                <div class="table-container selector-scroll">
+                    <table class="data-table selector-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px; text-align: center;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllCheckbox(this)"></th>
+                                <th>Dịch vụ</th>
+                                <th>Phương thức</th>
+                                <th>Loại</th>
+                                <th>Mô tả chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectorTableBody">
+                            <!-- Dynamically generated checkable rows -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
+                    <button onclick="cancelRun()" class="btn-cancel">💔 Hủy bỏ</button>
+                    <button id="btnResume" onclick="submitTestCaseSelection()" class="btn-kawaii">💖 Tiếp tục sinh test~!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Code Explorer Window (Results Dashboard) - Starts hidden -->
+        <div class="retro-window" id="window-codeexplorer" style="display: none; top: 120px; left: 220px; width: 850px; height: 560px; z-index: 50;">
+            <div class="window-header" onmousedown="focusWindow('window-codeexplorer', event)">
+                <div class="window-title-area">
+                    <span class="window-title-emoji">■</span>
+                    <span class="window-title-text">Code Explorer & Results</span>
+                </div>
+                <div class="window-controls">
+                    <button class="win-btn win-min" onclick="minimizeWindow('window-codeexplorer')">_</button>
+                    <button class="win-btn win-max" onclick="maximizeWindow('window-codeexplorer')">[ ]</button>
+                    <button class="win-btn win-close" onclick="closeWindow('window-codeexplorer')">X</button>
+                </div>
+            </div>
+            <div class="window-body explorer-body">
+                
+                <!-- Dashboard Statistics Area -->
+                <div class="dashboard-area" id="dashboardArea" style="display: none;">
+                    
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>💜 Độ bao phủ</h3>
+                            <div class="circular-progress-container">
+                                <svg class="progress-ring" width="100" height="100">
+                                    <circle class="progress-ring-circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="42" cx="50" cy="50"/>
+                                    <circle id="coverageRing" class="progress-ring-circle" stroke="var(--pink)" stroke-width="6" stroke-dasharray="263.89" stroke-dashoffset="263.89" fill="transparent" r="42" cx="50" cy="50"/>
+                                </svg>
+                                <div class="progress-text" id="coverageValue">0%</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>🌙 Test Cases</h3>
+                            <div class="stat-number" id="totalTestCases">0</div>
+                            <p class="stat-sub">Happy Path, Edge & Error Case ✿</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>⭐ Kết quả</h3>
+                            <div class="stat-number" id="testExecutionResult">-/-</div>
+                            <p class="stat-sub">Tests passed / Total ♡</p>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Tabs -->
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <button class="tab-btn active" onclick="switchTab('tab-plan')">📋 Kế hoạch kiểm thử</button>
+                            <button class="tab-btn" onclick="switchTab('tab-code')">💻 Mã nguồn sinh ra</button>
+                            <button class="tab-btn" onclick="switchTab('tab-report')" id="btn-tab-report" style="display: none;">📊 Báo cáo kiểm thử</button>
+                        </div>
+                        
+                        <!-- Test Plan Tab -->
+                        <div class="tab-content active" id="tab-plan">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Method</th>
+                                            <th>Test ID</th>
+                                            <th>Phân loại</th>
+                                            <th>Mô tả</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="testPlanTableBody">
+                                        <!-- Dynamically generated rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Generated Code Tab -->
+                        <div class="tab-content" id="tab-code">
+                            <div class="code-explorer-layout">
+                                <div class="file-list" id="generatedFilesList">
+                                    <!-- File item tabs will be generated here -->
+                                </div>
+                                <div class="code-viewer-card">
+                                    <div class="code-header">
+                                        <span class="file-path-title" id="currentFilePath">Select a file ♡</span>
+                                        <button class="copy-btn" onclick="copyCodeToClipboard()">📋 Copy</button>
+                                    </div>
+                                    <pre><code class="language-python" id="codeArea"># Mã nguồn sẽ xuất hiện ở đây sau khi chọn tệp~ ✧</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Report Tab -->
+                        <div class="tab-content" id="tab-report">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 2px solid var(--purple); padding-bottom: 6px;">
+                                <span style="font-family: 'Silkscreen', monospace; font-size: 0.75rem; color: var(--purple); font-weight: bold;">📝 Báo cáo phân tích quá trình kiểm thử</span>
+                                <button class="win-btn" onclick="downloadReport()" style="background: var(--pink); color: #fff; font-size: 0.65rem; padding: 2px 8px; cursor: pointer; border-radius: 2px;">💾 Tải xuống .md</button>
+                            </div>
+                            <div class="report-viewer" id="reportViewer" style="background: #faf6fc; border: 2px inset var(--purple); padding: 12px; font-family: 'Zen Maru Gothic', sans-serif; font-size: 0.8rem; line-height: 1.4; overflow-y: auto; max-height: 350px;">
+                                <!-- Markdown content will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Pop-up Bubble Message -->
+        <div class="speech-bubble" id="os-popup" onclick="closePopup()">
+            <div class="bubble-icon">ℹ️</div>
+            <div class="bubble-content">
+                <div class="bubble-title">OS Notification</div>
+                <div class="bubble-text">Double-click desktop icons to open windows! Click to dismiss...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Desktop Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn" onclick="toggleStartMenu()">
+            <span class="start-icon">💻</span>
+            <span class="start-text">START</span>
+        </button>
+        
+        <!-- Active windows tab list in taskbar -->
+        <div class="taskbar-tabs">
+            <button class="taskbar-tab active" id="tab-btn-window-haishin" onclick="toggleWindow('window-haishin')">haishin</button>
+            <button class="taskbar-tab" id="tab-btn-window-webcam" onclick="toggleWindow('window-webcam')">webcam</button>
+            <button class="taskbar-tab active" id="tab-btn-window-taskmanager" onclick="toggleWindow('window-taskmanager')">Task Manager</button>
+            <button class="taskbar-tab active" id="tab-btn-window-settings" onclick="toggleWindow('window-settings')">Settings</button>
+            <button class="taskbar-tab" id="tab-btn-window-codeexplorer" onclick="toggleWindow('window-codeexplorer')" style="display: none;">Code Explorer</button>
+        </div>
+        
+        <div class="system-tray">
+            <span class="tray-icon">📅</span>
+            <span class="day-badge">DAY 1</span>
+            <span class="system-time" id="systemClock">22:33</span>
+        </div>
+    </div>
+    
+    <!-- Retro Start Menu (hidden by default) -->
+    <div class="start-menu" id="startMenu" style="display: none;">
+        <div class="start-menu-sidebar">
+            <div class="sidebar-text">UNIT TEST AGENT</div>
+        </div>
+        <div class="start-menu-items">
+            <div class="start-menu-item" onclick="toggleWindow('window-settings'); toggleStartMenu();">
+                <span class="item-icon">⚙️</span>
+                <span class="item-text">Settings (Configure Agent)</span>
+            </div>
+            <div class="start-menu-item" onclick="toggleWindow('window-haishin'); toggleStartMenu();">
+                <span class="item-icon">📺</span>
+                <span class="item-text">haishin (Live stream)</span>
+            </div>
+            <div class="start-menu-item" onclick="toggleWindow('window-taskmanager'); toggleStartMenu();">
+                <span class="item-icon">📊</span>
+                <span class="item-text">Task Manager (Status)</span>
+            </div>
+            <div class="start-menu-item" onclick="toggleWindow('window-codeexplorer'); toggleStartMenu();">
+                <span class="item-icon">💻</span>
+                <span class="item-text">Code Explorer (Results)</span>
+            </div>
+            <hr class="start-divider">
+            <div class="start-menu-item" onclick="alert('Bây giờ mà tắt máy là KAngel giận á! ♡'); toggleStartMenu();">
+                <span class="item-icon">🔴</span>
+                <span class="item-text">Shut Down...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="/static/app.js"></script>
+    <script>
+    // Floating hearts animation (preserved and polished)
+    function spawnHearts() {
+        const container = document.getElementById('floatingHearts');
+        const symbols = ['♡','♥','✦','⭐','🌸','💜','✿','💖','🎀','☆'];
+        setInterval(() => {
+            const heart = document.createElement('span');
+            heart.className = 'float-heart';
+            heart.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (4 + Math.random()*4) + 's';
+            heart.style.fontSize = (0.6 + Math.random()*1.2) + 'rem';
+            heart.style.opacity = (0.15 + Math.random()*0.3);
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 8000);
+        }, 800);
+    }
+    spawnHearts();
+    
+    // System Clock Updater
+    function updateClock() {
+        const clock = document.getElementById('systemClock');
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        clock.innerText = `${hrs}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    </script>
+</body>
+</html>

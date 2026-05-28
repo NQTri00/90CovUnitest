@@ -1,0 +1,23 @@
+# System Configuration for Unit Test Agent
+
+models:
+  stage1: "deepseek/deepseek-v4-flash"
+  stage2: "deepseek/deepseek-v4-flash"
+  stage3: "deepseek/deepseek-v4-flash"
+  stage3_fallback: "deepseek/deepseek-v4-flash"
+  stage5: "deepseek/deepseek-v4-flash"
+  retry: "deepseek/deepseek-v4-flash"
+
+coverage:
+  line_threshold: 90
+  branch_threshold: 80
+  max_retries: 5
+
+execution:
+  timeout_seconds: 600
+  docker_memory_limit: "4g"
+  docker_cpu_limit: 2
+
+mutation:
+  enabled: false
+  score_threshold: 70
