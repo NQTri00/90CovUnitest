@@ -122,10 +122,10 @@ class Stage1Analysis:
                 sanitized = None
                 if llm_result:
                     sanitized = self.sanitize_service_metadata(llm_result, file_path)
-                    if not sanitized.get("methods") and local_parse.get("methods"):
+                    if not sanitized.get("methods"):
                         logger.warning(
                             f"Service {sanitized.get('class_name')} has no methods after sanitize "
-                            f"(LLM may have returned incomplete data but AST found methods). Falling back to local AST."
+                            f"(LLM may have returned incomplete data). Falling back to local AST."
                         )
                         sanitized = self.sanitize_service_metadata(local_parse, file_path)
                 else:
@@ -611,6 +611,17 @@ class Stage1Analysis:
 
         # Dependencies sanitization
         for d in raw_metadata.get("dependencies", []):
+            if isinstance(d, str):
+                d = {
+                    "field_name": d.lower(),
+                    "type": d,
+                    "category": "service",
+                    "mock_strategy": "Mock",
+                    "annotations": []
+                }
+            elif not isinstance(d, dict):
+                continue
+
             cat = d.get("category", "service")
             if cat not in ["repository", "http_client", "message_queue", "cache", "service", "utility"]:
                 cat = "service"
