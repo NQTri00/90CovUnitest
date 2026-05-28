@@ -130,6 +130,8 @@ QUY TẮC BẮT BUỘC:
 
 STAGE3_USER_PROMPT_TEMPLATE = """Dưới đây là thông tin chi tiết của class cần viết test:
 
+ĐƯỜNG DẪN TỆP TIN: {file_path}
+
 MÃ NGUỒN CLASS CẦN TEST:
 ```
 {source_code}
@@ -139,6 +141,8 @@ KẾ HOẠCH TEST CASES CẦN VIẾT:
 {test_cases_json}
 
 Hãy tạo file test hoàn chỉnh bao phủ tất cả các kịch bản kiểm thử trên.
+QUY TẮC IMPORT: Hãy chú ý đường dẫn tệp tin '{file_path}' ở trên để viết câu lệnh import chính xác tuyệt đối. 
+Ví dụ: Nếu tệp tin cần test ở `backend/app/services/task_worker.py` và backend là root của python path, thì import đúng phải là `from app.services.task_worker import TaskWorker` (không viết sai thành `from app.task_worker import TaskWorker`).
 """
 
 STAGE3_AUTO_FIX_PROMPT = """Mã nguồn test bạn vừa sinh ra bị lỗi cú pháp hoặc biên dịch. Hãy sửa lỗi này và trả về toàn bộ file test hoàn chỉnh.

@@ -104,7 +104,8 @@ class Stage3Generation:
                     source_code=source_code,
                     tcs=tcs,
                     language=language,
-                    framework=framework
+                    framework=framework,
+                    file_path=rel_file_path
                 )
 
             if test_file_content:
@@ -146,13 +147,15 @@ class Stage3Generation:
         source_code: str,
         tcs: List[Dict[str, Any]],
         language: str,
-        framework: str
+        framework: str,
+        file_path: str
     ) -> Optional[str]:
         """
         Query LLM to generate test class, checking syntax and requesting auto-fixes on error.
         """
         system_prompt = STAGE3_SYSTEM_PROMPT_JAVA if language == "java" else STAGE3_SYSTEM_PROMPT_PYTHON
         user_prompt = STAGE3_USER_PROMPT_TEMPLATE.format(
+            file_path=file_path,
             source_code=source_code,
             test_cases_json=json.dumps(tcs, indent=2)
         )
