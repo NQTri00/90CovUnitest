@@ -124,6 +124,18 @@ class Stage2Planning:
                     if "verify_mocks" in exp and isinstance(exp["verify_mocks"], list):
                         exp["verify_mocks"] = [str(vm) for vm in exp["verify_mocks"] if vm is not None]
 
+                    if "throws" in exp:
+                        if exp["throws"] is None:
+                            exp["throws"] = None
+                        elif isinstance(exp["throws"], dict):
+                            exp["throws"] = str(exp["throws"].get("exception_type") or exp["throws"].get("type") or exp["throws"].get("class") or exp["throws"])
+                        else:
+                            exp["throws"] = str(exp["throws"])
+                            
+                    if "exception_message_contains" in exp:
+                        if exp["exception_message_contains"] is not None:
+                            exp["exception_message_contains"] = str(exp["exception_message_contains"])
+
         # Validate against schema
         if schema and test_plan:
             try:

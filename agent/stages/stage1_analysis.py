@@ -574,7 +574,11 @@ class Stage1Analysis:
                 "visibility": m.get("visibility", "public"),
                 "params": [],
                 "return_type": m.get("return_type", "void"),
-                "throws": m.get("throws", []),
+                "throws": [
+                    str(t.get("exception_type") or t.get("type") or t.get("class") or t)
+                    if isinstance(t, dict) else str(t)
+                    for t in m.get("throws", []) if t is not None
+                ],
                 "annotations": m.get("annotations", []),
                 "complexity": int(m.get("complexity", 1)),
                 "priority": m.get("priority", "MEDIUM")
