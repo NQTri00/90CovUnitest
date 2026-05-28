@@ -155,6 +155,7 @@ class Stage4Execution:
 
         cmd = [
             pytest_cmd,
+            "-v",
             "--cov=.",  # Analyze the entire project folder
             "--cov-report=xml"
         ] + test_files
