@@ -565,9 +565,9 @@ class Stage1Analysis:
                 response_format={"type": "json_object"}
             )
             # Parse json output
-            from agent.llm.client import clean_json_response
+            from agent.llm.client import clean_json_response, robust_json_loads
             cleaned_response = clean_json_response(response)
-            result = json.loads(cleaned_response)
+            result = robust_json_loads(cleaned_response)
             return result
         except Exception as e:
             logger.error(f"LLM request failed for {file_path}: {e}")

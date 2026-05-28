@@ -97,3 +97,54 @@ def clean_json_response(content: str) -> str:
         
     return s
 
+
+def robust_json_loads(content: str) -> Any:
+    """
+    Tries to load JSON, and if it fails, cleans common LLM malformations and retries.
+    """
+    if not content:
+        return {}
+        
+    content = content.strip()
+    
+    import json
+    import re
+    import ast
+
+    # Try 1: Standard json.loads
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # Try 2: Clean trailing commas
+    # Remove trailing commas right before closing brackets/braces (e.g. [1, 2,] or {"a": 1,})
+    cleaned = re.sub(r',\s*([\]}])', r'\1', content)
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+
+    # Try 3: ast.literal_eval fallback
+    # Replace JSON-like values (true/false/null) to Python literals (True/False/None) 
+    # so ast.literal_eval can read it!
+    py_literal_str = cleaned.replace("true", "True").replace("false", "False").replace("null", "None")
+    try:
+        return ast.literal_eval(py_literal_str)
+    except Exception:
+        pass
+
+    # Try 4: Fix unescaped newlines inside quotes
+    try:
+        fixed_newlines = re.sub(
+            r'"([^"\\]*(?:\\.[^"\\]*)*)"',
+            lambda m: m.group(0).replace('\n', '\\n').replace('\r', '\\r'),
+            cleaned
+        )
+        return json.loads(fixed_newlines)
+    except Exception:
+        pass
+
+    # If all fail, raise the original exception
+    return json.loads(content)
+

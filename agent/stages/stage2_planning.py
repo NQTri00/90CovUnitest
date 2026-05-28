@@ -85,8 +85,9 @@ class Stage2Planning:
                     response_format={"type": "json_object"}
                 )
 
+                from agent.llm.client import robust_json_loads
                 cleaned_response = clean_json_response(response)
-                test_plan = json.loads(cleaned_response)
+                test_plan = robust_json_loads(cleaned_response)
             except Exception as e:
                 logger.error(f"LLM Test Planning failed: {e}. Falling back to local programmatic generator.")
                 update_progress(2, 60, "Phân tích AI thất bại, đang chuyển sang bộ sinh kế hoạch mặc định...")

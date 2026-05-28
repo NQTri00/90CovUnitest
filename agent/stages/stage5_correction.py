@@ -98,8 +98,9 @@ class Stage5Correction:
                     response_format={"type": "json_object"}
                 )
 
+                from agent.llm.client import robust_json_loads
                 cleaned_response = clean_json_response(response)
-                updated_plan = json.loads(cleaned_response)
+                updated_plan = robust_json_loads(cleaned_response)
             except Exception as e:
                 logger.error(f"Stage 5 LLM correction failed: {e}.")
                 raise RuntimeError(f"Self-correction LLM call failed: {e}")
