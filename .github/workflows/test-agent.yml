@@ -10,25 +10,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the target repository
+      # 1. Checkout the target repository (demo project)
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Pull and run the Unit Test Agent from GHCR
-      - name: Run Agent inside Docker container
+      # 2. Checkout the Unit Test Agent source code from its own repo
+      - name: Checkout Unit Test Agent
+        uses: actions/checkout@v4
+        with:
+          repository: NQTri00/90CovUnitest
+          path: agent-source
+
+      # 3. Build the Docker image from agent source
+      - name: Build Agent Docker Image
+        run: docker build -t 90covunitest:latest ./agent-source
+
+      # 4. Run the agent on demo_project
+      - name: Run Agent on demo_project
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          # Convert github.repository_owner to lowercase for docker compatibility
-          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          
           docker run --rm \
-            -v ${{ github.workspace }}/demo_project:/app/demo_project \
+            -v ${{ github.workspace }}/demo_project:/workspace \
             -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
-            ghcr.io/$OWNER_LC/90covunitest:latest \
-            python main.py --repo demo_project
+            90covunitest:latest \
+            python main.py --repo /workspace
 
-      # 3. Upload Generated Tests and Reports as Workflow Artifacts
+      # 5. Upload Generated Tests and Reports
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
