@@ -15,6 +15,40 @@ class Stage4Execution:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
 
+    def generate_mock_env(self, env_template: str) -> Dict[str, str]:
+        """
+        Use LLM to generate realistic mock environment variables based on template.
+        """
+        try:
+            from agent.llm.client import OpenRouterClient
+            client = OpenRouterClient()
+            if not client.api_key or client.api_key.startswith("your-openrouter-api-key") or client.api_key == "mock-key":
+                return {}
+                
+            system_prompt = (
+                "You are an expert devops and backend engineer. "
+                "Your task is to analyze the provided .env.example / .env template and generate realistic dummy/mock values "
+                "for all blank or placeholder fields so that local unit tests run successfully without settings or validation errors. "
+                "CRITICAL: Return ONLY a raw valid JSON object mapping keys to generated values. Do NOT wrap in markdown block (```json) or add any explanation."
+            )
+            user_prompt = f"Template content:\n{env_template}\n\nGenerate realistic mock values and return a flat JSON dictionary."
+            
+            response = client.chat_completion(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.1
+            )
+            
+            # Clean and parse JSON
+            from agent.llm.client import clean_json_response
+            cleaned = clean_json_response(response)
+            return json.loads(cleaned)
+        except Exception as e:
+            logger.warning(f"Failed to generate mock env via LLM: {e}")
+            return {}
+
     def run(self, state: AgentState) -> AgentState:
         """
         Run Stage 4: Test Execution & Coverage.
@@ -185,33 +219,58 @@ class Stage4Execution:
                         
         env["PYTHONPATH"] = os.pathsep.join(python_paths)
 
-        # Auto-mock missing environment variables from .env.example / .env
+        # Auto-detect and mock missing environment variables from .env.example / .env
         env_files = ["env.example", ".env.example", ".env"]
+        env_template_content = ""
         for env_name in env_files:
             env_path = os.path.join(repo_path, env_name)
             if os.path.exists(env_path):
-                logger.info(f"Auto-detecting environment variables from {env_name}...")
                 try:
                     with open(env_path, "r", encoding="utf-8", errors="ignore") as ef:
-                        for line in ef:
-                            line = line.strip()
-                            if not line or line.startswith("#"):
-                                continue
-                            if "=" in line:
-                                key = line.split("=")[0].strip()
-                                # If the key is not set in env, let's mock it
-                                if key and key not in env:
-                                    # Generate a strong generic mock key or dummy value
-                                    if "SECRET" in key.upper() or "KEY" in key.upper() or "PASSWORD" in key.upper():
-                                        env[key] = "dummy_mock_secret_key_generated_by_unit_test_agent_that_is_very_long_and_secure_to_pass_validation_checks_12345"
-                                    elif "PORT" in key.upper():
-                                        env[key] = "5432"
-                                    elif "URL" in key.upper() or "HOST" in key.upper():
-                                        env[key] = "localhost"
-                                    else:
-                                        env[key] = "dummy_mock_value"
-                except Exception as env_err:
-                    logger.warning(f"Failed to auto-mock environment variables from {env_name}: {env_err}")
+                        env_template_content = ef.read()
+                    break
+                except Exception as e:
+                    logger.warning(f"Failed to read env template file {env_path}: {e}")
+
+        if env_template_content:
+            logger.info("Auto-mocking missing environment variables...")
+            # 1. Attempt smart LLM-driven env mocking
+            mocked_env = self.generate_mock_env(env_template_content)
+            
+            # 2. Fallback to parsing default values from the template text
+            parsed_defaults = {}
+            for line in env_template_content.splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" in line:
+                    parts = line.split("=", 1)
+                    key = parts[0].strip()
+                    val = parts[1].strip() if len(parts) > 1 else ""
+                    # Remove surrounding quotes from default value if any
+                    if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+                        val = val[1:-1]
+                    parsed_defaults[key] = val
+
+            # 3. Merge values into env
+            all_keys = set(mocked_env.keys()) | set(parsed_defaults.keys())
+            for key in all_keys:
+                if key and key not in env:
+                    # Prioritize LLM generated values if non-empty, otherwise use parsed defaults
+                    llm_val = mocked_env.get(key)
+                    default_val = parsed_defaults.get(key, "")
+                    
+                    # If default_val is just a placeholder (like empty, or <value>, your-key, changeme)
+                    is_placeholder = not default_val or any(p in default_val.lower() for p in ["your-", "change-", "changeme", "placeholder", "<", ">", "mock", "todo"])
+                    
+                    if llm_val and (is_placeholder or not default_val):
+                        env[key] = str(llm_val)
+                    else:
+                        # Fallback: if no LLM value but it's a placeholder, generate a basic default string
+                        if is_placeholder and not default_val:
+                            env[key] = "dummy_mock_value_generated_by_agent_12345"
+                        else:
+                            env[key] = default_val
 
         # Auto-recovery loop for missing python dependencies during test run
         max_dependency_retries = 5
