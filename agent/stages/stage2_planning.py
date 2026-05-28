@@ -11,6 +11,25 @@ from agent.progress import update_progress
 
 logger = logging.getLogger(__name__)
 
+def _extract_exception_string(t: Any) -> str:
+    if isinstance(t, dict):
+        # 1. Search for any string value that looks like an Exception class name
+        for v in t.values():
+            if isinstance(v, str) and any(suffix in v for suffix in ["Error", "Exception", "Fail", "Err", "Exc"]):
+                return v
+        # 2. Search for keys containing type, class, name, exc, error
+        for k, v in t.items():
+            if isinstance(k, str) and any(term in k.lower() for term in ["type", "class", "name", "exc", "error"]):
+                if isinstance(v, str):
+                    return v
+        # 3. Pick the first string value
+        for v in t.values():
+            if isinstance(v, str):
+                return v
+        # 4. Ultimate fallback
+        return str(t)
+    return str(t)
+
 class Stage2Planning:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
@@ -127,10 +146,8 @@ class Stage2Planning:
                     if "throws" in exp:
                         if exp["throws"] is None:
                             exp["throws"] = None
-                        elif isinstance(exp["throws"], dict):
-                            exp["throws"] = str(exp["throws"].get("exception_type") or exp["throws"].get("type") or exp["throws"].get("class") or exp["throws"])
                         else:
-                            exp["throws"] = str(exp["throws"])
+                            exp["throws"] = _extract_exception_string(exp["throws"])
                             
                     if "exception_message_contains" in exp:
                         if exp["exception_message_contains"] is not None:

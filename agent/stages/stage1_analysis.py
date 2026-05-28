@@ -13,6 +13,25 @@ from agent.progress import update_progress
 
 logger = logging.getLogger(__name__)
 
+def _extract_exception_string(t: Any) -> str:
+    if isinstance(t, dict):
+        # 1. Search for any string value that looks like an Exception class name
+        for v in t.values():
+            if isinstance(v, str) and any(suffix in v for suffix in ["Error", "Exception", "Fail", "Err", "Exc"]):
+                return v
+        # 2. Search for keys containing type, class, name, exc, error
+        for k, v in t.items():
+            if isinstance(k, str) and any(term in k.lower() for term in ["type", "class", "name", "exc", "error"]):
+                if isinstance(v, str):
+                    return v
+        # 3. Pick the first string value
+        for v in t.values():
+            if isinstance(v, str):
+                return v
+        # 4. Ultimate fallback
+        return str(t)
+    return str(t)
+
 class Stage1Analysis:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
@@ -575,8 +594,7 @@ class Stage1Analysis:
                 "params": [],
                 "return_type": m.get("return_type", "void"),
                 "throws": [
-                    str(t.get("exception_type") or t.get("type") or t.get("class") or t)
-                    if isinstance(t, dict) else str(t)
+                    _extract_exception_string(t)
                     for t in m.get("throws", []) if t is not None
                 ],
                 "annotations": m.get("annotations", []),
