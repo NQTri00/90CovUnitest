@@ -98,6 +98,81 @@ def clean_json_response(content: str) -> str:
     return s
 
 
+def repair_truncated_json(s: str) -> str:
+    """
+    Repair a JSON string that has been abruptly truncated due to token limits.
+    """
+    s = s.strip()
+    if not s:
+        return "{}"
+
+    stack = []
+    in_string = False
+    escape = False
+    valid_length = 0
+    
+    for idx, c in enumerate(s):
+        if escape:
+            escape = False
+            valid_length = idx + 1
+            continue
+            
+        if c == '\\':
+            escape = True
+            valid_length = idx + 1
+            continue
+            
+        if c == '"':
+            in_string = not in_string
+            valid_length = idx + 1
+            continue
+            
+        if not in_string:
+            if c == '{':
+                stack.append('{')
+            elif c == '[':
+                stack.append('[')
+            elif c == '}':
+                if stack and stack[-1] == '{':
+                    stack.pop()
+                else:
+                    break
+            elif c == ']':
+                if stack and stack[-1] == '[':
+                    stack.pop()
+                else:
+                    break
+            valid_length = idx + 1
+        else:
+            valid_length = idx + 1
+
+    truncated_s = s[:valid_length].strip()
+    
+    if in_string:
+        truncated_s += '"'
+        
+    while truncated_s:
+        last_c = truncated_s[-1]
+        if last_c in [',', ':', '{', '[', '"', ' ']:
+            if last_c == '{':
+                if stack and stack[-1] == '{':
+                    stack.pop()
+            elif last_c == '[':
+                if stack and stack[-1] == '[':
+                    stack.pop()
+            truncated_s = truncated_s[:-1].strip()
+        else:
+            break
+            
+    for opening in reversed(stack):
+        if opening == '{':
+            truncated_s += '}'
+        elif opening == '[':
+            truncated_s += ']'
+            
+    return truncated_s
+
+
 def robust_json_loads(content: str) -> Any:
     """
     Tries to load JSON, and if it fails, cleans common LLM malformations and retries.
@@ -125,7 +200,14 @@ def robust_json_loads(content: str) -> Any:
     except json.JSONDecodeError:
         pass
 
-    # Try 3: ast.literal_eval fallback
+    # Try 3: Repair truncated JSON
+    try:
+        repaired = repair_truncated_json(cleaned)
+        return json.loads(repaired)
+    except Exception:
+        pass
+
+    # Try 4: ast.literal_eval fallback
     # Replace JSON-like values (true/false/null) to Python literals (True/False/None) 
     # so ast.literal_eval can read it!
     py_literal_str = cleaned.replace("true", "True").replace("false", "False").replace("null", "None")
@@ -134,7 +216,15 @@ def robust_json_loads(content: str) -> Any:
     except Exception:
         pass
 
-    # Try 4: Fix unescaped newlines inside quotes
+    # Try 5: ast.literal_eval on repaired
+    try:
+        repaired = repair_truncated_json(cleaned)
+        py_literal_repaired = repaired.replace("true", "True").replace("false", "False").replace("null", "None")
+        return ast.literal_eval(py_literal_repaired)
+    except Exception:
+        pass
+
+    # Try 6: Fix unescaped newlines inside quotes
     try:
         fixed_newlines = re.sub(
             r'"([^"\\]*(?:\\.[^"\\]*)*)"',
