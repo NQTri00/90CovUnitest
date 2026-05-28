@@ -149,6 +149,7 @@ class Stage2Planning:
         """
         test_cases = []
         services = analysis_result.get("services", [])
+        counters = {}
 
         for service in services:
             service_name = service.get("class_name", "UnknownService")
@@ -184,11 +185,15 @@ class Stage2Planning:
                     val = "1L" if "Long" in p_type or "int" in p_type or "Integer" in p_type else '"test"'
                     inputs[p_name] = val
 
+                key = f"{service_name}_{method_name}"
+
                 # 1. Happy Path Test Case
+                counters[key] = counters.get(key, 0) + 1
+                test_id_happy = f"{key}_{counters[key]:03d}"
                 test_cases.append({
                     "service": service_name,
                     "method": method_name,
-                    "test_id": f"{service_name}_{method_name}_001",
+                    "test_id": test_id_happy,
                     "type": "happy_path",
                     "description": f"Chạy thành công phương thức {method_name} với tham số hợp lệ",
                     "setup": {
@@ -213,10 +218,12 @@ class Stage2Planning:
                         p_name = p.get("name")
                         edge_inputs[p_name] = "null"
                     
+                    counters[key] = counters.get(key, 0) + 1
+                    test_id_edge = f"{key}_{counters[key]:03d}"
                     test_cases.append({
                         "service": service_name,
                         "method": method_name,
-                        "test_id": f"{service_name}_{method_name}_002",
+                        "test_id": test_id_edge,
                         "type": "edge_case",
                         "description": f"Kiểm tra phương thức {method_name} với đầu vào null",
                         "setup": {
@@ -250,10 +257,12 @@ class Stage2Planning:
                             "return_value": thrown_exc
                         })
                         
+                    counters[key] = counters.get(key, 0) + 1
+                    test_id_error = f"{key}_{counters[key]:03d}"
                     test_cases.append({
                         "service": service_name,
                         "method": method_name,
-                        "test_id": f"{service_name}_{method_name}_003" if method.get("params") else f"{service_name}_{method_name}_002",
+                        "test_id": test_id_error,
                         "type": "error_path",
                         "description": f"Xử lý lỗi ném exception {thrown_exc} từ dependencies",
                         "setup": {

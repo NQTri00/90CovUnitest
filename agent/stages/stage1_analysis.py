@@ -17,7 +17,7 @@ class Stage1Analysis:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.llm_client = OpenRouterClient()
-        self.model = config.get("models", {}).get("stage1", "kimi/kimi-k2.6")
+        self.model = config.get("models", {}).get("stage1", "deepseek/deepseek-v4-flash")
 
     def run(self, state: AgentState) -> AgentState:
         """
@@ -69,30 +69,42 @@ class Stage1Analysis:
                 continue
 
             # Local AST parse fallback
-            local_parse = None
+            local_parses = []
             if language == "java":
-                local_parse = JavaParser.parse_file(file_path, source_code)
+                parsed = JavaParser.parse_file(file_path, source_code)
+                if parsed:
+                    local_parses = [parsed]
             elif language == "python":
                 parser = PythonParser(file_path, source_code)
-                parsed_classes = parser.parse()
-                if parsed_classes:
-                    local_parse = parsed_classes[0]  # Take the first class
+                local_parses = parser.parse()
 
-            # If LLM key is missing, use local parse directly
-            if not self.llm_client.api_key or self.llm_client.api_key.startswith("your-openrouter-api-key"):
-                if local_parse:
+            for local_parse in local_parses:
+                # If LLM key is missing or mock, use local parse directly
+                MOCK_KEY_PREFIXES = ("your-openrouter-api-key", "mock-key", "sk-test", "test-")
+                is_mock_key = not self.llm_client.api_key or any(self.llm_client.api_key.startswith(p) for p in MOCK_KEY_PREFIXES)
+                if is_mock_key:
                     services_metadata.append(self.sanitize_service_metadata(local_parse, file_path))
-                continue
+                    continue
 
-            # LLM-based enrichment
-            llm_result = self.call_llm_analysis(file_path, source_code, language, framework, local_parse)
-            
-            if llm_result:
-                services_metadata.append(self.sanitize_service_metadata(llm_result, file_path))
-            elif local_parse:
-                # LLM failed, fallback to local AST parse
-                logger.warning(f"LLM analysis failed for {file_path}. Falling back to local AST.")
-                services_metadata.append(self.sanitize_service_metadata(local_parse, file_path))
+                # LLM-based enrichment
+                llm_result = self.call_llm_analysis(file_path, source_code, language, framework, local_parse)
+                
+                sanitized = None
+                if llm_result:
+                    sanitized = self.sanitize_service_metadata(llm_result, file_path)
+                    if not sanitized.get("methods"):
+                        logger.warning(
+                            f"Service {sanitized.get('class_name')} has no methods after sanitize "
+                            f"(LLM may have returned incomplete data). Falling back to local AST."
+                        )
+                        sanitized = self.sanitize_service_metadata(local_parse, file_path)
+                else:
+                    # LLM failed, fallback to local AST parse
+                    logger.warning(f"LLM analysis failed for {file_path} (class {local_parse.get('class_name')}). Falling back to local AST.")
+                    sanitized = self.sanitize_service_metadata(local_parse, file_path)
+                
+                if sanitized:
+                    services_metadata.append(sanitized)
 
         analysis_result = {
             "repo": {
@@ -164,6 +176,7 @@ class Stage1Analysis:
             
         score = 0
         classes = [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+        has_class_with_1_public_method_and_logic = False
         has_class_with_2_public_methods = False
         has_init_with_params = False
         
@@ -185,11 +198,22 @@ class Stage1Analysis:
                             has_init_with_params = True
                     elif not method_name.startswith("_"):
                         public_methods_count += 1
+                        
+                        # Count control flow in this method
+                        method_control_structures = 0
+                        for subnode in ast.walk(node):
+                            if isinstance(subnode, (ast.If, ast.For, ast.While, ast.Try)):
+                                method_control_structures += 1
+                        if method_control_structures >= 1:
+                            has_class_with_1_public_method_and_logic = True
             if public_methods_count >= 2:
                 has_class_with_2_public_methods = True
 
         if has_class_with_2_public_methods:
             score += 40
+            
+        if has_class_with_1_public_method_and_logic:
+            score += 25
             
         if has_init_with_params:
             score += 10
@@ -201,6 +225,15 @@ class Stage1Analysis:
                 
         if control_structures >= 3:
             score += 20
+
+        # Functional-style module check
+        if not classes:
+            func_level_defs = [
+                node for node in tree.body 
+                if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
+            ]
+            if len(func_level_defs) >= 3 and control_structures >= 2:
+                score += 30
             
         is_all_data_only = True
         if classes:
@@ -260,7 +293,15 @@ class Stage1Analysis:
             
         lines = code_content.splitlines()
         if not classes and len(lines) < 50:
-            score -= 30
+            is_functional = False
+            func_level_defs = [
+                node for node in tree.body 
+                if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
+            ]
+            if len(func_level_defs) >= 3 and control_structures >= 2:
+                is_functional = True
+            if not is_functional:
+                score -= 30
             
         return score
 
@@ -424,7 +465,11 @@ class Stage1Analysis:
                 
             # Tiêu chí: Tên file chứa từ khóa âm (-50 điểm)
             neg_keywords = ["config", "settings", "constant", "enum", "schema", "migration", "seed", "fixture"]
-            if any(kw in rel_path.lower() for kw in neg_keywords):
+            path_parts = rel_path.lower().replace("\\", "/").split("/")
+            filename_stem = os.path.splitext(path_parts[-1])[0]  # bỏ extension
+            if any(part in neg_keywords for part in path_parts[:-1]):   # thư mục âm
+                score -= 50
+            elif filename_stem in neg_keywords:   # tên file khớp chính xác
                 score -= 50
                 
             # Step 2: Score content

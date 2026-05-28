@@ -172,5 +172,8 @@ KẾ HOẠCH TEST HIỆN TẠI (TEST PLAN):
 BÁO CÁO ĐỘ BAO PHỦ (COVERAGE REPORT):
 {coverage_report_json}
 
+MÃ NGUỒN CÁC DÒNG CHƯA ĐƯỢC COVER (SOURCE CODE CONTEXT):
+{uncovered_sources_context}
+
 Hãy trả về tệp JSON test_plan hoàn chỉnh sau khi đã bổ sung các ca test cần thiết hoặc sửa các ca test bị lỗi.
 """

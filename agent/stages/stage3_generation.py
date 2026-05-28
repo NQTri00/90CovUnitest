@@ -56,6 +56,15 @@ class Stage3Generation:
         output_base_dir = os.path.join(repo_path, "generated_tests")
         os.makedirs(output_base_dir, exist_ok=True)
 
+        # Write run header separator to failed_methods.log
+        log_path = os.path.join(repo_path, "failed_methods.log")
+        try:
+            from datetime import datetime
+            with open(log_path, "a", encoding="utf-8") as lf:
+                lf.write(f"\n=== Run {datetime.now().isoformat()} ===\n")
+        except Exception as e:
+            logger.error(f"Failed to write header to failed_methods.log: {e}")
+
         services_analysis = state.get("analysis_result", {}).get("services", [])
         services_by_name = {s["class_name"]: s for s in services_analysis}
 

@@ -32,8 +32,9 @@ class OpenRouterClient:
         """
         Send a chat completion request to OpenRouter.
         """
-        if not self.api_key or self.api_key.startswith("your-openrouter-api-key"):
-            logger.warning("Using mock response because OPENROUTER_API_KEY is not set.")
+        MOCK_KEY_PREFIXES = ("your-openrouter-api-key", "mock-key", "sk-test", "test-")
+        if not self.api_key or any(self.api_key.startswith(p) for p in MOCK_KEY_PREFIXES):
+            logger.warning("Using mock response because OPENROUTER_API_KEY is not set or is mock.")
             return '{"mocked": true}'
 
         for attempt in range(max_retries):
