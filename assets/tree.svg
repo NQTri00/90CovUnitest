@@ -63,6 +63,28 @@
       <ellipse cx="330" cy="415" rx="18" ry="7" transform="rotate(15 330 415)"/>
       <ellipse cx="790" cy="275" rx="20" ry="7" transform="rotate(-20 790 275)"/>
     </g>
+    <!-- capybara resting beneath the tree -->
+    <g id="resting-capybara">
+      <ellipse cx="918" cy="1044" rx="154" ry="22" fill="#182a29" opacity=".38"/>
+      <path d="M805 1001 C804 958 836 925 891 916 C936 908 980 925 1004 956
+               C1020 977 1010 1016 979 1030 C936 1048 852 1043 819 1025
+               C810 1019 805 1011 805 1001Z" fill="#8b6043"/>
+      <path d="M838 967 C867 935 920 927 961 947 C979 956 989 976 980 994
+               C956 1017 891 1024 847 1004 C832 996 828 981 838 967Z" fill="#a87954"/>
+      <path d="M957 951 C978 927 1011 923 1034 938 C1054 952 1057 981 1040 1000
+               C1027 1015 1001 1017 982 1003 C968 991 963 971 957 951Z" fill="#956747"/>
+      <path d="M1002 985 C1023 974 1048 977 1061 991 C1051 1008 1026 1016 1003 1007
+               C994 1002 994 992 1002 985Z" fill="#c08d67"/>
+      <path d="M982 938 C978 924 987 915 999 918 C1008 920 1012 932 1006 943Z" fill="#704a37"/>
+      <path d="M1020 940 C1020 927 1030 923 1039 930 C1047 937 1044 948 1035 953Z" fill="#704a37"/>
+      <path d="M836 1010 C829 1021 834 1031 850 1032 L876 1032 C883 1026 879 1017 867 1012Z" fill="#694936"/>
+      <path d="M922 1020 C914 1030 920 1038 936 1038 L959 1036 C966 1029 958 1020 946 1018Z" fill="#694936"/>
+      <path d="M1027 1000 C1037 1004 1044 1001 1049 995" fill="none" stroke="#704a37" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="1039" cy="978" rx="4.5" ry="5.5" fill="#211d1b"/>
+      <ellipse cx="1056" cy="994" rx="5" ry="3.5" fill="#34241f"/>
+      <path d="M1040 1007 Q1030 1013 1019 1008" fill="none" stroke="#674431" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M856 954 Q900 930 945 947" fill="none" stroke="#c99a70" stroke-width="5" opacity=".45" stroke-linecap="round"/>
+    </g>
     <!-- foreground grasses -->
     <g stroke="#a3a17a" stroke-width="5" stroke-linecap="round" opacity=".6" fill="none">
       <path d="M170 1050 q-25 -55 -45 -70 M170 1050 q0 -70 20 -95 M170 1050 q35 -45 60 -55"/>
