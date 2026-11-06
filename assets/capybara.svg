@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Capybara in a sunny meadow</title>
+  <desc id="desc">A gentle illustrated capybara sitting in a grassy meadow beside a pond, with reeds, flowers and soft clouds.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9e4df"/>
+      <stop offset="1" stop-color="#e9f0d6"/>
+    </linearGradient>
+    <linearGradient id="coat" x2=".15" y2="1">
+      <stop stop-color="#c58d5e"/>
+      <stop offset="1" stop-color="#8d5c3f"/>
+    </linearGradient>
+    <linearGradient id="water" x2="0" y2="1">
+      <stop stop-color="#8fc9bd"/>
+      <stop offset="1" stop-color="#579d91"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#sky)"/>
+  <circle cx="930" cy="205" r="86" fill="#f8d98e"/>
+  <g fill="#fff9e8" opacity=".78">
+    <ellipse cx="240" cy="230" rx="95" ry="27"/><ellipse cx="295" cy="215" rx="58" ry="36"/><ellipse cx="345" cy="232" rx="74" ry="24"/>
+    <ellipse cx="700" cy="330" rx="70" ry="22"/><ellipse cx="745" cy="313" rx="48" ry="31"/><ellipse cx="790" cy="331" rx="65" ry="21"/>
+  </g>
+
+  <path d="M0 690 Q180 590 360 670 T740 650 T1200 635 V1200 H0Z" fill="#a7c68b"/>
+  <path d="M0 790 Q210 690 430 770 T850 750 T1200 735 V1200 H0Z" fill="#759f6c"/>
+  <path d="M0 900 Q250 810 500 885 T950 860 T1200 875 V1200 H0Z" fill="#527d5a"/>
+
+  <path d="M55 880 Q260 790 430 850 Q585 900 710 850 Q870 780 1110 865 Q1050 1040 840 1085 Q540 1145 260 1050 Q100 1000 55 880Z" fill="url(#water)"/>
+  <g fill="none" stroke="#d4eee0" stroke-width="8" stroke-linecap="round" opacity=".65">
+    <path d="M170 930 Q270 910 365 936"/><path d="M760 930 Q860 906 975 930"/><path d="M500 1010 Q600 990 690 1010"/>
+  </g>
+
+  <ellipse cx="590" cy="1000" rx="290" ry="55" fill="#304d3c" opacity=".24" filter="url(#soft)"/>
+
+  <!-- capybara body -->
+  <path d="M330 822 C335 690 425 590 590 570 C735 552 856 626 889 746
+           C910 825 870 922 788 955 C690 994 450 978 369 918
+           C340 896 326 861 330 822Z" fill="url(#coat)"/>
+  <path d="M385 816 C400 705 490 635 606 625 C724 615 815 678 840 775
+           C858 846 810 908 742 930 C632 964 458 940 402 890
+           C385 872 378 844 385 816Z" fill="#d3a174" opacity=".65"/>
+  <path d="M490 929 Q470 976 493 1002 L562 1002 Q580 985 554 948Z" fill="#76503a"/>
+  <path d="M700 940 Q680 979 704 1001 L772 1001 Q789 984 763 944Z" fill="#76503a"/>
+
+  <!-- head and muzzle -->
+  <path d="M715 650 C740 570 825 528 912 553 C988 575 1031 646 1014 719
+           C1002 775 951 815 883 813 C813 811 751 771 722 716
+           C710 692 707 672 715 650Z" fill="#a8734e"/>
+  <path d="M858 685 C900 659 978 673 1021 716 C1045 740 1040 778 1012 798
+           C971 827 892 808 855 778 C832 760 835 708 858 685Z" fill="#d2a078"/>
+  <path d="M959 717 Q1000 707 1024 731 Q1034 747 1018 759 Q992 772 957 754Z" fill="#e2b18a"/>
+  <ellipse cx="1007" cy="741" rx="13" ry="10" fill="#3d3029"/>
+  <circle cx="1003" cy="737" r="3.5" fill="#fff0d9"/>
+  <circle cx="914" cy="637" r="10" fill="#302820"/>
+  <circle cx="911" cy="634" r="3.5" fill="#fff3df"/>
+  <path d="M882 574 Q859 540 883 527 Q911 518 925 557Z" fill="#85583e"/>
+  <path d="M888 557 Q882 543 894 541 Q906 541 911 561Z" fill="#d39b7a"/>
+  <path d="M951 581 Q970 548 990 565 Q1004 580 984 606Z" fill="#85583e"/>
+  <path d="M968 579 Q980 567 989 580 L979 592Z" fill="#d39b7a"/>
+  <path d="M950 781 Q978 794 1000 781" fill="none" stroke="#80553d" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- grass and flowers -->
+  <g stroke="#355f45" stroke-width="9" stroke-linecap="round" fill="none">
+    <path d="M95 1050 Q80 960 112 908 M115 1050 Q145 975 165 950 M1040 1050 Q1020 965 1045 910 M1080 1050 Q1110 970 1140 945"/>
+    <path d="M245 1080 Q220 1000 240 960 M270 1080 Q300 1010 325 990 M900 1080 Q920 1005 950 985"/>
+  </g>
+  <g fill="#f4d78f">
+    <circle cx="113" cy="900" r="13"/><circle cx="164" cy="944" r="11"/><circle cx="1045" cy="903" r="13"/><circle cx="1140" cy="938" r="12"/>
+  </g>
+  <g fill="#f1eee0">
+    <circle cx="240" cy="953" r="11"/><circle cx="325" cy="984" r="10"/><circle cx="950" cy="980" r="11"/>
+  </g>
+  <g fill="#d58c72">
+    <circle cx="113" cy="900" r="5"/><circle cx="164" cy="944" r="4"/><circle cx="1045" cy="903" r="5"/><circle cx="1140" cy="938" r="4"/>
+  </g>
+  <g fill="#3e6848">
+    <path d="M35 1110 Q65 1030 92 1020 Q85 1080 35 1110Z"/><path d="M1100 1115 Q1130 1035 1170 1025 Q1160 1090 1100 1115Z"/>
+    <path d="M180 1120 Q195 1055 230 1045 Q225 1100 180 1120Z"/><path d="M970 1120 Q995 1050 1025 1040 Q1020 1095 970 1120Z"/>
+  </g>
+</svg>
