@@ -52,63 +52,6 @@
       <path d="M475 450 C430 420 390 455 405 500 C385 550 445 590 485 555 C530 600 590 570 580 520 C610 475 550 435 520 460Z" fill="#6d8559"/>
       <path d="M760 430 C710 400 665 440 680 485 C650 540 715 580 755 545 C800 585 855 545 835 495 C865 455 810 410 780 440Z" fill="#46654b"/>
     </g>
-    <!-- sakura blossoms added to the existing canopy -->
-    <g fill="#f7b8c8" stroke="#e995ad" stroke-width="2" opacity=".96">
-      <g transform="translate(342 260)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(445 300) scale(.82)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(555 230) scale(.9)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(690 290) scale(.86)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(775 390) scale(.82)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(470 485) scale(.78)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-      <g transform="translate(620 475) scale(.86)">
-        <ellipse cx="0" cy="-10" rx="7" ry="11"/><ellipse cx="9" cy="-3" rx="7" ry="11" transform="rotate(72 9 -3)"/><ellipse cx="6" cy="8" rx="7" ry="11" transform="rotate(144 6 8)"/><ellipse cx="-6" cy="8" rx="7" ry="11" transform="rotate(216 -6 8)"/><ellipse cx="-9" cy="-3" rx="7" ry="11" transform="rotate(288 -9 -3)"/><circle r="4" fill="#f7df9b" stroke="none"/>
-      </g>
-    </g>
-    <!-- ripe apples added among the blossoms -->
-    <g>
-      <g transform="translate(390 395)">
-        <path d="M0 -13 Q-4 -23 1 -28" fill="none" stroke="#49382b" stroke-width="4" stroke-linecap="round"/>
-        <path d="M2 -24 Q14 -31 18 -22 Q10 -16 2 -24Z" fill="#8da66a"/>
-        <path d="M0 -15 C-15 -24 -27 -12 -24 5 C-21 23 -7 30 0 23 C8 30 22 22 25 5 C28 -12 14 -24 0 -15Z" fill="#c94e45" stroke="#8e3834" stroke-width="2"/>
-        <ellipse cx="-10" cy="-5" rx="5" ry="9" fill="#f5a18a" opacity=".75"/>
-      </g>
-      <g transform="translate(535 365) scale(.82)">
-        <path d="M0 -13 Q-4 -23 1 -28" fill="none" stroke="#49382b" stroke-width="4" stroke-linecap="round"/>
-        <path d="M2 -24 Q14 -31 18 -22 Q10 -16 2 -24Z" fill="#8da66a"/>
-        <path d="M0 -15 C-15 -24 -27 -12 -24 5 C-21 23 -7 30 0 23 C8 30 22 22 25 5 C28 -12 14 -24 0 -15Z" fill="#c94e45" stroke="#8e3834" stroke-width="2"/>
-        <ellipse cx="-10" cy="-5" rx="5" ry="9" fill="#f5a18a" opacity=".75"/>
-      </g>
-      <g transform="translate(710 390) scale(.9)">
-        <path d="M0 -13 Q-4 -23 1 -28" fill="none" stroke="#49382b" stroke-width="4" stroke-linecap="round"/>
-        <path d="M2 -24 Q14 -31 18 -22 Q10 -16 2 -24Z" fill="#8da66a"/>
-        <path d="M0 -15 C-15 -24 -27 -12 -24 5 C-21 23 -7 30 0 23 C8 30 22 22 25 5 C28 -12 14 -24 0 -15Z" fill="#c94e45" stroke="#8e3834" stroke-width="2"/>
-        <ellipse cx="-10" cy="-5" rx="5" ry="9" fill="#f5a18a" opacity=".75"/>
-      </g>
-      <g transform="translate(500 535) scale(.78)">
-        <path d="M0 -13 Q-4 -23 1 -28" fill="none" stroke="#49382b" stroke-width="4" stroke-linecap="round"/>
-        <path d="M2 -24 Q14 -31 18 -22 Q10 -16 2 -24Z" fill="#8da66a"/>
-        <path d="M0 -15 C-15 -24 -27 -12 -24 5 C-21 23 -7 30 0 23 C8 30 22 22 25 5 C28 -12 14 -24 0 -15Z" fill="#c94e45" stroke="#8e3834" stroke-width="2"/>
-        <ellipse cx="-10" cy="-5" rx="5" ry="9" fill="#f5a18a" opacity=".75"/>
-      </g>
-      <g transform="translate(790 500) scale(.82)">
-        <path d="M0 -13 Q-4 -23 1 -28" fill="none" stroke="#49382b" stroke-width="4" stroke-linecap="round"/>
-        <path d="M2 -24 Q14 -31 18 -22 Q10 -16 2 -24Z" fill="#8da66a"/>
-        <path d="M0 -15 C-15 -24 -27 -12 -24 5 C-21 23 -7 30 0 23 C8 30 22 22 25 5 C28 -12 14 -24 0 -15Z" fill="#c94e45" stroke="#8e3834" stroke-width="2"/>
-        <ellipse cx="-10" cy="-5" rx="5" ry="9" fill="#f5a18a" opacity=".75"/>
-      </g>
-    </g>
     <!-- small leaf highlights -->
     <g fill="#a0a36a" opacity=".72">
       <ellipse cx="355" cy="275" rx="28" ry="9" transform="rotate(-28 355 275)"/>
